@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.nokia.s60tools.extensions.framework"
+      label="Carbide.c++ Extensions - Framework plug-ins"
+      version="1.7.0"
+      provider-name="Nokia">
+
+   <description>
+      Common framework plug-ins feature contains following plug-ins:
+com.nokia.s60tools.util:
+Util plug-in provides miscellaneous utility classes for logging
+to Eclipse’s Console view output, for parametrizable debugging,
+and for interaction with external command line tools. 
+com.nokia.s60tools.ui:
+UI plug-in provides classes providing reusable UI services, such
+as, dialogs, customized UI components, custom sorters, and other
+UI related helper classes.
+com.nokia.s60tools.sdk (deprecated):
+Plug-in SDK provides from Carbide.c++ v1.2 onwards a stable API
+for accessing SDK related services. This API is deprecated, and
+by com.nokia.carbide.cpp.sdk.core should be used instead whenever 
+possible. This SDK plugin is still however in use because of backward
+compatibility reasons, and it also offers some services that 
+are not available via Carbide&apos;s SDK API.
+   </description>
+
+   <copyright>
+      Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+All rights reserved. License: http://www.eclipse.org/legal/epl-v10.html.
+   </copyright>
+
+   <license>
+Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies).
+All rights reserved.
+This component and the accompanying materials are made available
+under the terms of &quot;Eclipse Public License v1.0&quot;
+which accompanies this distribution, and is available
+at the URL &quot;http://www.eclipse.org/legal/epl-v10.html&quot;.
+   </license>
+
+   <url>
+      <update label="Carbide.c++ Update Site" url="http://tools.ext.nokia.com/updates/carbide22"/>
+      <discovery label="Carbide.c++ Update Site" url="http://tools.ext.nokia.com/updates/carbide22"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="com.nokia.carbide.cpp.sdk.core"/>
+      <import plugin="org.eclipse.cdt.core"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="com.freescale.cdt.debug.cw.core" version="1.4.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.cdt.core" version="5.0.1" match="greaterOrEqual"/>
+      <import plugin="com.nokia.carbide.cpp.project.core"/>
+   </requires>
+
+   <plugin
+         id="com.nokia.s60tools.sdk"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.nokia.s60tools.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.nokia.s60tools.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>

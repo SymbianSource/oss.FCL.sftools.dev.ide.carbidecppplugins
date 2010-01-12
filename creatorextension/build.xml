@@ -1,0 +1,162 @@
+  
+<project name="com.nokia.s60tools.creator" default="build.all">
+
+  <!-- declare ant4eclipse -->
+  <taskdef resource="net/sf/ant4eclipse/antlib.xml" />
+
+  <!-- Name definitions -->
+  <property name="feature.name" value="Creator"/>
+  <property name="project.name" value="com.nokia.carbide.extensions.creator" />
+  <property name="jar.filename" value="${ant.project.name}.jar"/>
+  
+  <!-- Folder definitions -->
+  <property name="workspace.path" value="." />
+  <property name="java.location" value="C:/APPS/j2sdk_1.5.0_12" />
+  <property name="destination.path" value="." />
+  
+  <property name="carbide.folder" value="C:/Carbide_internal" />
+	<property name="carbide.int.folder" location="c:/Carbide_internal/plugins"/>
+	<property name="carbide.dev.folder" location="c:/Carbide_development/plugins"/>
+	
+  <property name="reports.folder" location="reports"/>
+	<property name="reports.emma" location="${reports.folder}/emma"/>
+	<property name="instr.folder" location="instr"/>
+	<property name="binaries.folder" location="${feature.name}.binaries"/>
+	
+	
+	<!-- EMMA configuration -->
+ 	<path id="emma.lib" >
+    	<pathelement location="${ant.home}/lib/emma.jar" />
+    	<pathelement location="${ant.home}/lib/emma_ant.jar" />
+  	</path>
+
+  	<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+	
+	<!-- PMD configuration -->
+	<path id="pmd.lib" >
+    	<pathelement location="${ant.home}/lib/pmd-4.2.5.jar" />
+    	<pathelement location="${ant.home}/lib/asm-3.1.jar" />
+    	<pathelement location="${ant.home}/lib/jaxen-1.1.1.jar" />
+  	</path>
+	
+	<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.lib" />
+	
+	<!-- Folders -->
+	<delete dir="${instr.folder}"/>
+	<mkdir dir="${instr.folder}"/>
+	
+	<delete dir="${reports.folder}"/>
+	<mkdir dir="${reports.folder}"/>
+	
+	<!-- Carbide_classpath -->
+	<path id="carbide_classpath">
+		<fileset dir="${carbide.int.folder}" includes="**/*.jar" />
+	</path>
+	
+  <!-- Delete old plugins and features -->
+  <target name="delete">
+	  <delete dir="plugins" failonerror="false"/>
+	  <delete dir="features" failonerror="false"/>
+	  <delete dir="${ant.project.name}/bin" failonerror="false"/>
+  </target>
+ 
+ 
+ 
+   
+  <!-- Target Plugin -->
+  <target name="build.creator" depends="">
+  
+  <!-- Copy necessary resources -->
+		<copy todir="${ant.project.name}/bin" failonerror="true" overwrite="false">
+			<fileset dir="${ant.project.name}/src/" excludes="**/*.java, **/package.htm*" />
+		</copy>
+  
+  <buildPlugin workspace="${workspace.path}" targetPlatformLocation="${carbide.folder}" projectname="${ant.project.name}" destDir="${destination.path}" packageAsJar="true">
+  	<javacLibraryCompiler>
+  <compilerSettings debug="true" fork="true"/>
+  </javacLibraryCompiler>
+  </buildPlugin>
+  <buildPlugin workspace="${workspace.path}" targetPlatformLocation="${carbide.folder}" projectname="${ant.project.name}.help" destDir="${destination.path}" packageAsJar="true">
+  	<javacLibraryCompiler>
+  <compilerSettings debug="true" fork="true"/>
+  </javacLibraryCompiler>
+  </buildPlugin>
+                
+  <!-- Build MultiTestRunner feature -->
+  <buildFeature workspace="${workspace.path}"
+               targetPlatformLocation="${carbide.folder}"
+               projectname="${project.name}"
+               buildPluginTarget="build.plugin"
+               destDir="${destination.path}" />
+               
+  </target>
+  
+  <!-- Empty target to do nothing --> 
+  <target name="build.plugin">
+  </target>	
+  
+  
+  
+  <!-- Instrumentation target, depends on build.mtrunner -->
+	<target name="instr" depends="build.creator">
+		<!-- Instrument the source code -->
+		<emma>
+			<instr instrpath="${ant.project.name}/bin" destdir="${instr.folder}" metadatafile="${reports.emma}/metadata.emma" merge="true"/>
+		</emma>
+	</target>
+  
+  
+  <target name="create.zip">
+  
+  	<delete dir="${binaries.folder}/nightly_builds"/>
+  	<mkdir dir="${binaries.folder}/nightly_builds"/>
+  	
+ 		 <!-- Zip jars to MultiTestRunner.zip -->
+ 		<tstamp>
+		   <format property="timestamp" pattern="dd-MM-yyyy" />
+		</tstamp> 
+ 		 
+    <zip destfile="${binaries.folder}/nightly_builds/${feature.name}.${timestamp}.zip"
+       basedir="."
+       includes="plugins/*, features/com.nokia.carbide.extensions.*/"/>
+  </target>
+  
+  <!-- Analyze target -->
+	<target name="analyze">
+		<!-- PMD -->
+		<pmd shortFileNames="true">
+			<!-- Rules -->
+			<ruleset>basic</ruleset>
+			<ruleset>codesize</ruleset>
+			<ruleset>coupling</ruleset>
+			<ruleset>design</ruleset>
+			<ruleset>strictexception</ruleset>
+			<ruleset>strings</ruleset>
+			<ruleset>sunsecure</ruleset>
+			<ruleset>unusedcode</ruleset>
+			<ruleset>junit</ruleset>
+			
+			<!-- XML output -->
+			<formatter type="xml" toFile="${reports.folder}/report.pmd.xml"/>
+			
+			<!-- Files to analyze -->
+			<fileset dir="com.nokia.s60tools.creator/src/">
+				<include name="**/*.java"/>
+			</fileset>
+		</pmd>
+	</target>
+	
+	<target name="copy_to_carbide">
+	<!-- Copy the actual plug-ins to the carbide folders -->
+		<copy todir="${carbide.int.folder}" failonerror="true" overwrite="true">
+				<fileset dir="plugins"/>
+		</copy>
+		<copy todir="${carbide.dev.folder}" failonerror="true" overwrite="true">
+				<fileset dir="plugins"/>
+		</copy>
+  </target>
+  
+  <!-- Target Build all -->
+  <target name="build.all" depends="delete, build.creator, instr, create.zip, analyze, copy_to_carbide" />
+  
+</project>

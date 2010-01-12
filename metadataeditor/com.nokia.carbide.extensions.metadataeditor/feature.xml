@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.nokia.carbide.extensions.metadataeditor"
+      label="Carbide.c++ Extensions - Metadata Editor"
+      version="1.1.2"
+      provider-name="Nokia"
+      plugin="com.nokia.s60tools.metadataeditor">
+
+   <description>
+      Metadata Editor is validating visual editor for XML based API metadata.
+   </description>
+
+   <copyright>
+      Copyright (c) 2007 - 2009 Nokia Corporation and/or its subsidiary(-ies). 
+      All rights reserved. License: http://www.eclipse.org/legal/epl-v10.html.
+   </copyright>
+
+
+   <license url="license.txt">
+This component and the accompanying materials are made available
+under the terms of &quot;Eclipse Public License v1.0&quot;
+which accompanies this distribution, and is available
+at the URL &quot;http://www.eclipse.org/legal/epl-v10.html&quot;.
+
+   </license>
+
+   <url>
+      <update label="Carbide.c++ Update Site" url="http://tools.ext.nokia.com/updates/carbide22"/>
+      <discovery label="Carbide.c++ Update Site" url="http://tools.ext.nokia.com/updates/carbide203"/>
+   </url>         
+
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="com.nokia.s60tools.util" version="1.1.10" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="com.nokia.s60tools.metadataeditor"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.nokia.s60tools.metadataeditor.doc.user"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
