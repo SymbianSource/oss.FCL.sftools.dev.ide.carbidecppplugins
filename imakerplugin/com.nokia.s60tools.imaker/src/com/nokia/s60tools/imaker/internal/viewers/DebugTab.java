@@ -18,6 +18,7 @@
 package com.nokia.s60tools.imaker.internal.viewers;
 
 import java.io.File;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.util.EList;
@@ -456,33 +457,14 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
-//
-//
-//	public void runPressed() {
-//		ImageContent ic = getInput();
-//		List<IbyEntry> entries = new ArrayList<IbyEntry>();
-//		entries.addAll(ic.getEntries());
-//		IMakerUtils.createIbyFiles(entries,projectManager);
-//	}
 
 	/* (non-Javadoc)
 	 * @see com.nokia.s60tools.imaker.internal.viewers.IPropertyViewer#addToProperties(com.nokia.s60tools.imaker.internal.model.ImakerProperties)
 	 */
 	public void addToProperties(ImakerProperties prop) {
 		ImageContent input = getInput();
-		StringBuffer sb = new StringBuffer();
-		EList<IbyEntry> entries = input.getEntries();
-		for (int i = 0; i < entries.size(); i++) {
-			IbyEntry entry=entries.get(i);
-			entry.append(sb);
-			if(i<entries.size()-1) {
-				sb.append(ImakerProperties.SEPARATOR);				
-			}
-		}
-		String str = sb.toString();
-		if(!str.equals("")) {
-			prop.put(IMakerKeyConstants.DEBUGFILES, str);			
-		}
+		prop.put(IMakerKeyConstants.DEBUGFILES, input.getEntries());			
+
 	}
 	
 	/* (non-Javadoc)
@@ -491,18 +473,13 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 	public void restoreFromProperties(ImakerProperties prop) {
 		ImageContent input = getInput();
 		EList<IbyEntry> entries = input.getEntries();
-		String str = (String)prop.get(IMakerKeyConstants.DEBUGFILES);
-		if(str!=null&&!str.equals("")) {
-			entries.clear();
-			String[] entriesStr = str.split(ImakerProperties.SEPARATOR);
-			for (int i = 0; i < entriesStr.length; i++) {
-				String entryStr = entriesStr[i];
-				if(entryStr!=null&&!entryStr.equals("")) {
-					entries.add(IContentFactory.eINSTANCE.createEntryFromString(entryStr));					
-				}
-			}
-			tableViewer.refresh();
+		entries.clear();
+		Object ents = prop.get(IMakerKeyConstants.DEBUGFILES);
+		if(ents!=null) {
+			List<IbyEntry> ls = (List<IbyEntry>) ents;
+			entries.addAll(ls);
 		}
+		tableViewer.refresh();
 	}
 
 	private ImageContent getInput() {

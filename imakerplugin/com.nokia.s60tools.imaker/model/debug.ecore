@@ -19,6 +19,5 @@
     <eLiterals name="CORE"/>
     <eLiterals name="ROFS2" value="1"/>
     <eLiterals name="ROFS3" value="2"/>
-    <eLiterals name="UDA" value="3"/>
   </eClassifiers>
 </ecore:EPackage>

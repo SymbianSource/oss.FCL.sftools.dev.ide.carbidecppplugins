@@ -17,7 +17,6 @@
 
 package com.nokia.s60tools.imaker.internal.viewers;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,11 +24,13 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -59,8 +60,8 @@ import org.eclipse.ui.PlatformUI;
 import com.nokia.s60tools.imaker.IEnvironment;
 import com.nokia.s60tools.imaker.IEnvironmentManager;
 import com.nokia.s60tools.imaker.IIMakerWrapper;
-import com.nokia.s60tools.imaker.IMakerPlugin;
 import com.nokia.s60tools.imaker.IMakerKeyConstants;
+import com.nokia.s60tools.imaker.IMakerPlugin;
 import com.nokia.s60tools.imaker.IMakerUtils;
 import com.nokia.s60tools.imaker.ImageFlasherHelpContextIDs;
 import com.nokia.s60tools.imaker.Messages;
@@ -527,13 +528,6 @@ public class PreferencesTab extends CTabItem {
 		try {
 			iMakerCoreVersion = activeEnvironment.getIMakerCoreVersion();
 			
-			//check imaker version here 
-			if(!verifyIMakerVersion()) {
-				String msg = Messages.getString("Error.3"); //$NON-NLS-1$
-				String minVersion = Messages.getString("PreferencesTab.22"); //$NON-NLS-1$
-				StatusHandler.handle(IStatus.ERROR,msg.replace("xxx", minVersion),null); //$NON-NLS-1$
-				return;
-			}
 			fixVersionText();
 			activeEnvironment.load();
 			if(activeEnvironment.isLoaded()) {
@@ -610,15 +604,6 @@ public class PreferencesTab extends CTabItem {
 	}
 
 
-	private boolean verifyIMakerVersion() {
-		String minVersion = Messages.getString("PreferencesTab.22"); //$NON-NLS-1$
-		String curVersion = IMakerUtils.parseIMakerVersion(iMakerCoreVersion);
-		if(curVersion.compareTo(minVersion)>0) {
-			return true;
-		}
-		return false;
-	}
-
 	private void savePreferencesToFile(String filePath) {
 		ImakerProperties uiValues = new ImakerProperties();
 		uiValues.putAll(getUIValues());
@@ -646,7 +631,14 @@ public class PreferencesTab extends CTabItem {
 			}
 		} else {
 			IFile file = (IFile)projectManager.getImakerFile(new Path(filePath));
-			uiValues.saveToFile(file);
+			uiValues.saveToFile(file.getLocation().toFile());
+			try {
+				file.refreshLocal(IResource.DEPTH_ZERO, null);
+			} catch (CoreException e) {
+				IStatus status = new Status(Status.WARNING,IMakerPlugin.PLUGIN_ID,"Refreshing file ("+file.getLocation().toOSString()+")failled!",e);
+				IMakerPlugin.getDefault().getLog().log(status);
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -655,8 +647,7 @@ public class PreferencesTab extends CTabItem {
 		try {
 			UIConfiguration config = (UIConfiguration) textProduct.getData();
 			if(config!=null) {
-				addField(prop,IMakerKeyConstants.MAKEFILE,config.getFilePath());
-				addField(prop,IMakerKeyConstants.PRODUCT,config.getMakeFileName());
+				addField(prop,IMakerKeyConstants.PRODUCT,config.getConfigurationName());
 			}
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < listTarget.getItemCount(); i++) {
@@ -683,12 +674,9 @@ public class PreferencesTab extends CTabItem {
 			}
 			addField(prop, IMakerKeyConstants.ADDITIONAL_PARAMETERS, 
 					textUserDefinedParameters.getText());
-			settingsTab.addChangedSettings(prop);
 			platsimTab.addToProperties(prop);
 			tabDebug.addToProperties(prop);
-		} catch(Exception e) {
-
-		}
+		} catch(Exception e) {}
 		return prop;
 	}
 
@@ -700,17 +688,24 @@ public class PreferencesTab extends CTabItem {
 	}
 
 	private void fillUIForm(ImakerProperties prop) throws InvocationTargetException {
-		String filePath = (String) prop.remove(IMakerKeyConstants.MAKEFILE);
-		if(filePath==null) return;
-		filePath = filePath.replaceAll("\\\\", "/");
+		String targetProduct = (String) prop.remove(IMakerKeyConstants.PRODUCT);
+		if(targetProduct==null) return;
+		boolean found = false;
 		List<UIConfiguration> configs = activeEnvironment.getConfigurations();
 		for (UIConfiguration config : configs) {
-			if(config.getFilePath().equals(filePath)) {
+			if(config.getConfigurationName().equals(targetProduct)) {
 				refreshProduct(config);
+				found = true;
 				break;
 			}
 		}
 
+		if (!found) {
+			IStatus status = new Status(Status.WARNING,IMakerPlugin.PLUGIN_ID,"Unable to fill dialog ui, because product: "+targetProduct+" not found!");
+			IMakerPlugin.getDefault().getLog().log(status);			
+			return;
+		}
+		
 		String targets = (String) prop.remove(IMakerKeyConstants.TARGET_LIST);
 		if((targets!=null)&&!(targets.equals(""))) { //$NON-NLS-1$
 			String[] tars = targets.split(" "); //$NON-NLS-1$
@@ -774,14 +769,38 @@ public class PreferencesTab extends CTabItem {
 
 	/**
 	 * Called when something changed in the settingsTab.
+	 * @param modVariable 
 	 */
-	public void refreshSettingsTab() {
+	public void refreshSettingsTab(UIVariable modVariable) {
 		if(!settingsTab.isDirty()) {
 			return;
 		}
 		String drive = activeEnvironment.getDrive();
 		IRunnableWithProgress op = new IMakerSettingsUpdater(null,drive);
 		executeRunnable(op);
+		if (modVariable!=null) {
+			String text = textUserDefinedParameters.getText();
+			if(text!=null) {
+				text = text.trim();
+				if(!"".equals(text)) {
+					text = text +" " + getVariableString(modVariable);
+				} else {
+					text = getVariableString(modVariable);
+				}
+			} else {
+				text = getVariableString(modVariable);
+			}
+			textUserDefinedParameters.setText(text);
+		}
+	}
+
+	private String getVariableString(UIVariable variable) {
+		String value = variable.getValue();
+		if(value.contains(" ")) {
+			return variable.getName()+"=\""+value+"\"";
+		} else {
+			return variable.getName()+"="+value;					
+		}
 	}
 
 	private void executeRunnable(IRunnableWithProgress op) {
@@ -880,15 +899,11 @@ public class PreferencesTab extends CTabItem {
 	public void loadImakerFile(String item) throws InvocationTargetException {
 		if(!item.equals(ProjectManager.NEW_ITEM)) {
 			IFile file = (IFile)projectManager.getImakerFile(new Path(item));
-			ImakerProperties prop = new ImakerProperties();
-			try {
-				prop.load(file.getContents());
-				fillUIForm(prop);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (CoreException e) {
-				e.printStackTrace();
-			};
+			if(file!=null) {
+				ImakerProperties prop = null;
+				prop = ImakerProperties.createFromFile(file);
+				fillUIForm(prop);				
+			}
 		} else {
 			loadDefaults();
 			fillUIForm(activeEnvironment.getRunProperties());

@@ -113,6 +113,13 @@ public interface IIMakerWrapper {
 	 * @return
 	 */
 	public abstract String getBuildCommand(List<String> params);
+
+	/**
+	 * Construct the full iMaker command that will be executed and return it as a String for convenience
+	 * @param params, command line parameters for iMaker
+	 * @return
+	 */
+	public abstract String getBuildCommand(File impFile);
 	
 	/**
 	 * Get full path to iMaker tool that will be run

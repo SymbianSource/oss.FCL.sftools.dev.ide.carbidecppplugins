@@ -129,13 +129,28 @@ public class PlatsimTab extends CTabItem implements IPropertyViewer {
 	
 	private String getInstance() {
 		int index = instancesCombo.getSelectionIndex();
-		return instancesCombo.getItem(index);
+		if(index!=-1) {
+			return instancesCombo.getItem(index);			
+		} else {
+			String text = instancesCombo.getText();
+			if(text!=null) {
+				return text;
+			}
+		}
+		return null;
 	}
 
 	public void addToProperties(ImakerProperties prop) {
 		if(isActivated()) {
-			prop.put(IMakerKeyConstants.PLATSIM_INSTANCE, getInstance());
-			prop.put(IMakerKeyConstants.PLATSIM_RUN, String.valueOf(run.getSelection()));
+			String instance = getInstance();
+			if (instance!=null) {
+				prop.put(IMakerKeyConstants.PLATSIM_INSTANCE, instance);				
+			}
+			if(run.getSelection()) {
+				prop.put(IMakerKeyConstants.PLATSIM_RUN, "1");				
+			} else {
+				prop.put(IMakerKeyConstants.PLATSIM_RUN, "0");				
+			}
 		}
 	}
 

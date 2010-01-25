@@ -289,7 +289,7 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 		
 	protected void handleRevertPressed() {
 		if(fTabFolder.getSelection() == tabSettings) {
-			tabPreferences.refreshSettingsTab();
+			tabPreferences.refreshSettingsTab(null);
 		} else {
 //			tabPreferences.revert();
 		}
@@ -374,7 +374,7 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 			descriptor = IMakerPlugin.getImageDescriptor("icons/settings.gif"); //$NON-NLS-1$
 			return descriptor.createImage();
 		case 3:
-			descriptor = IMakerPlugin.getImageDescriptor("icons/debug.gif"); //$NON-NLS-1$
+			descriptor = IMakerPlugin.getImageDescriptor("icons/content.gif"); //$NON-NLS-1$
 			return descriptor.createImage();
 		case 4:
 			descriptor = IMakerPlugin.getImageDescriptor("icons/platsim.png"); //$NON-NLS-1$

@@ -139,5 +139,19 @@
          </presentation>
       </config>
    </extension>
+   <extension
+         point="org.eclipse.emf.ecore.generated_package">
+      <package
+            class="com.nokia.s60tools.imaker.internal.impmodel.ImpmodelPackage"
+            uri="http://www.s60.com/xml/imp/1">
+      </package>
+   </extension>
+   <extension
+         point="org.eclipse.emf.ecore.extension_parser">
+      <parser
+            class="com.nokia.s60tools.imaker.internal.impmodel.util.ImpResourceFactoryImpl"
+            type="imp">
+      </parser>
+   </extension>
  
 </plugin>

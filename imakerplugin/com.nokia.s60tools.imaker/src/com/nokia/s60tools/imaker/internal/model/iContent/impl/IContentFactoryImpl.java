@@ -16,7 +16,6 @@
 */
 package com.nokia.s60tools.imaker.internal.model.iContent.impl;
 
-import com.nokia.s60tools.imaker.internal.model.iContent.*;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
@@ -24,6 +23,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.impl.EFactoryImpl;
 import org.eclipse.emf.ecore.plugin.EcorePlugin;
 
+import com.nokia.s60tools.imaker.internal.model.ImakerProperties;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentFactory;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentPackage;
 import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
@@ -172,15 +172,16 @@ public class IContentFactoryImpl extends EFactoryImpl implements IContentFactory
 	}
 
 	public IbyEntry createEntryFromString(String initialValue) {
-		String[] parts = initialValue.split(";");
-		IbyEntry entry = IContentFactory.eINSTANCE.createIbyEntry();
-		if(parts.length>=5) {
+		String[] parts = initialValue.split(ImakerProperties.IBYENTRY_FIELDS_SEPARATOR);
+		if(parts.length>=4) {
+			IbyEntry entry = IContentFactory.eINSTANCE.createIbyEntry();
 			entry.setEnabled(new Boolean(parts[0]));
-			entry.setDebug(new Boolean(parts[1]));
-			entry.setFile(parts[2]);
-			entry.setTarget(parts[3]);
-			entry.setLocation(IMAGESECTION.get(parts[4]));
+//			entry.setDebug(new Boolean(parts[1]));
+			entry.setFile(parts[1]);
+			entry.setTarget(parts[2]);
+			entry.setLocation(IMAGESECTION.get(parts[3]));
+			return entry;
 		}
-		return entry;
+		return null;
 	}	
 } //IContentFactoryImpl

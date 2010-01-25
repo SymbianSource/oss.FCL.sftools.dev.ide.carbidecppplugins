@@ -17,6 +17,7 @@
 
 package com.nokia.s60tools.imaker;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -47,5 +48,12 @@ public interface IEnvironmentManager {
 	 * @return
 	 */
 	public abstract List<IEnvironment> getEnviroments();
+
+	/**
+	 * Last run file
+	 * @param file
+	 */
+	public abstract void setLastRun(File file);
+	public abstract File getLastRun();
 
 }

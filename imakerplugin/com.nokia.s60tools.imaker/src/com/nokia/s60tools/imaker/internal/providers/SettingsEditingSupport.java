@@ -77,7 +77,7 @@ public class SettingsEditingSupport extends EditingSupport {
 
 	@Override
 	protected void setValue(Object element, Object value) {
-		UIVariable variable = (UIVariable)element;
+		final UIVariable variable = (UIVariable)element;
 
 		switch (this.column) {
 		case 1:
@@ -90,7 +90,7 @@ public class SettingsEditingSupport extends EditingSupport {
 
 					public void run() {
 						if(PreferencesTab.currentPreferencesTab!=null) {
-							PreferencesTab.currentPreferencesTab.refreshSettingsTab();
+							PreferencesTab.currentPreferencesTab.refreshSettingsTab(variable);
 						}
 					}
 					

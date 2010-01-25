@@ -30,6 +30,7 @@ public class IMakerKeyConstants {
     public static final String ADDITIONAL_PARAMETERS = "ADDITIONAL_PARAMETERS";
 	public static final String MODIFIED_SETTINGS     = "MODIFIED_SETTINGS";
 	public static final String PREFS_DIRECTORY       = "imaker";
+	
 	public static final String DEBUGFILES            = "DEBUG_FILES";
 	
 	//platsim specific settings

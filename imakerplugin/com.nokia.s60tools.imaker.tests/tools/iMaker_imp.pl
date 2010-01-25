@@ -28,6 +28,13 @@
 
 $numArgs = $#ARGV + 1;
 
+if($numArgs eq 0) {
+print "
+iMaker 10.03.01, 24-Apr-2009.
+";
+exit(0);
+}
+
 sub printArgs {
 	print "-----------------------\n";
 	print "Commandline arguments:\n";

@@ -20,7 +20,6 @@ package com.nokia.s60tools.imaker.internal.tests;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.InputStream;
 
 import junit.framework.TestCase;
 
@@ -35,16 +34,21 @@ import org.eclipse.core.runtime.CoreException;
 public class ProjectBuilder extends TestCase {
 	public static final String TESTDATA_DIR   = "testdata";
 	public static final String[] imp_file_names = new String[] {"test1.imp","test2.imp"};
+//	public static final String[] imp_file_names = new String[] {"test1.imp","test2.imp"};
 	public static final String[] imp_file_contents = new String[] {
-		"#iMaker properties\n" +
-		"#Fri Sep 18 09:31:17 EEST 2009\n" +
-		"PRODUCT=my_product.mk\n" +
-		"TARGET=all\n" +
-		"HWID=1010\n" +
-		"NAME=FIELD_VALUE\n" +
-		"MAKEFILE=\\\\epoc32\\\\rom\\\\config\\\\ncp70\\\\corolla\\\\corolla12mpix\\\\image_conf_corolla12mpix.mk\n" +
-		"TYPE=rnd\n" +
-		"TARGET_LIST=all\n",
+		"define IMAGE_ORIDECONF\n" +
+		"\\sys\\bin\\HelloConsole.exe replace-add core\n"+
+		"endef\n" + 
+		"define IMAGE_ORIDEFILES\n" +
+		"\\epoc32\\release\\ARMV5\\UDEB\\HelloConsole.exe \\sys\\bin\\HelloConsole.exe\n"+
+		"endef\n"+
+		"WORKDIR = \\temp\n"+
+		"VERBOSE = 31\n" +
+		"USE_SYMGEN = 1\n" +
+		"TYPE = rnd\n" +
+		"DEFAULT_GOALS = core rofs3\n" +
+		"TARGET_PRODUCT = test_ui"
+		,
 		"#iMaker properties\n" +
 		"#Fri Sep 18 09:31:17 EEST 2009\n" +
 		"PRODUCT=image_conf_dilbert_ui.mk\n" +
@@ -74,40 +78,30 @@ public class ProjectBuilder extends TestCase {
 	protected void closeAndDeleteDefaultProject() throws CoreException {
 		if(project!=null&&project.exists()) {
 			project.close(null);
-			project.delete(true, null);
+			project.delete(true, true, null);
 		}
 	}
 
-	protected IFile[] addImakerImpFiles() {
+	protected IFile addImakerImpFiles(String content, String name) {
 		IFolder folder = project.getFolder(TESTDATA_DIR);
-		IFile[] ifiles = new IFile[imp_file_names.length];
 		try {
 			if(!folder.exists()) {
 				folder.create(true, true, null);	
 			}
-			for (int i = 0; i < imp_file_names.length; i++) {
-				String f_name = imp_file_names[i];			
-				IFile file = folder.getFile(f_name);
-				if(!file.exists()) {
-					file.create(getContent(i), true, null);
-				} else {
-					file.setContents(getContent(i), true, false, null);					
-				}
-				ifiles[i]=file;
+			ByteArrayInputStream input = new ByteArrayInputStream(content.getBytes());
+			IFile file = folder.getFile(name);
+			if(!file.exists()) {
+				file.create(input, true, null);
+			} else {
+				file.setContents(input, true, false, null);			
 			}
-			return ifiles;
+			return file;
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	private InputStream getContent(int file) {
-		String contents = imp_file_contents[file];
-		ByteArrayInputStream input = new ByteArrayInputStream(contents.getBytes());
-		return input;
-	}
-
 	public static File[] getTestFiles() {
 		File f = new File(TESTDATA_DIR);
 		File[] files = f.listFiles(new FilenameFilter() {

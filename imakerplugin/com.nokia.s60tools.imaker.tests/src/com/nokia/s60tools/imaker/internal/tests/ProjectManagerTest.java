@@ -39,7 +39,6 @@ public class ProjectManagerTest extends ProjectBuilder  {
 
 	public void setUp() throws Exception {
 		createDefaultProject();
-		addImakerImpFiles();
 		assertTrue(project.isAccessible());
 		projectManager = new ProjectManager(project);
 	}
@@ -51,7 +50,9 @@ public class ProjectManagerTest extends ProjectBuilder  {
     public void testLocation() {
     	assertTrue(!projectManager.getRoot().equals(""));
     }
-	public void testImplFiles() throws Exception {
+
+    public void testImplFiles() throws Exception {
+    	addImakerImpFiles("sample content", "test.imp");
 		assertTrue("No impl files found. There shoud be some in the testdata folder!",!projectManager.getImakerFiles().isEmpty());		
 	}
 

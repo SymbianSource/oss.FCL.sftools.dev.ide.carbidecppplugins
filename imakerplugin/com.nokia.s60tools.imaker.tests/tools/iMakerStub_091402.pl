@@ -44,7 +44,7 @@ foreach $argnum (0 .. $#ARGV) {
 
 if($numArgs eq 0) {
 print "
-iMaker 09.14.02, 24-Apr-2009.
+iMaker 10.03.01, 24-Apr-2009.
 
 Print help data on documented iMaker API items; targets and variables.
 Wildcards *, ? and [] can be used with % patterns.

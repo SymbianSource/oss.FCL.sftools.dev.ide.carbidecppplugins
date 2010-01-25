@@ -17,6 +17,7 @@
 
 package com.nokia.s60tools.imaker.internal.managers;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ public class EnvironmentManager implements IEnvironmentManager {
 	private static IEnvironmentManager instance = null;
 	private ArrayList<IEnvironment> environments;
 	private IEnvironment activeEnvironment;
+	private File lastRun;
 
 	public static IEnvironmentManager getInstance() {
 		if(instance==null) {
@@ -99,5 +101,13 @@ public class EnvironmentManager implements IEnvironmentManager {
 			}
 		}
 		return false;
+	}
+
+	public void setLastRun(File file) {
+		this.lastRun  = file;
+	}
+	
+	public File getLastRun() {
+		return lastRun;
 	}
 }

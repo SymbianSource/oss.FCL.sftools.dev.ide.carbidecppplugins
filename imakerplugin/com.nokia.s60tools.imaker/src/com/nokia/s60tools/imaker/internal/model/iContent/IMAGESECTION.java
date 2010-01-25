@@ -60,17 +60,7 @@ public enum IMAGESECTION implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	ROFS3(2, "ROFS3", "ROFS3"),
-
-	/**
-	 * The '<em><b>UDA</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #UDA_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	UDA(3, "UDA", "UDA");
+	ROFS3(2, "ROFS3", "ROFS3");
 
 	/**
 	 * The '<em><b>CORE</b></em>' literal value.
@@ -118,21 +108,6 @@ public enum IMAGESECTION implements Enumerator {
 	public static final int ROFS3_VALUE = 2;
 
 	/**
-	 * The '<em><b>UDA</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>UDA</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #UDA
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int UDA_VALUE = 3;
-
-	/**
 	 * An array of all the '<em><b>IMAGESECTION</b></em>' enumerators.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -143,7 +118,6 @@ public enum IMAGESECTION implements Enumerator {
 			CORE,
 			ROFS2,
 			ROFS3,
-			UDA,
 		};
 
 	/**
@@ -158,12 +132,12 @@ public enum IMAGESECTION implements Enumerator {
 	 * Returns the '<em><b>IMAGESECTION</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * @generated NOT
 	 */
 	public static IMAGESECTION get(String literal) {
 		for (int i = 0; i < VALUES_ARRAY.length; ++i) {
 			IMAGESECTION result = VALUES_ARRAY[i];
-			if (result.toString().equals(literal)) {
+			if (result.toString().equalsIgnoreCase(literal)) {
 				return result;
 			}
 		}
@@ -197,7 +171,6 @@ public enum IMAGESECTION implements Enumerator {
 			case CORE_VALUE: return CORE;
 			case ROFS2_VALUE: return ROFS2;
 			case ROFS3_VALUE: return ROFS3;
-			case UDA_VALUE: return UDA;
 		}
 		return null;
 	}

@@ -32,7 +32,7 @@ public class IMakerAPITest extends IMakerCoreTest {
 
 		IIMakerWrapper wrapper = getWrapper(stubPath);
 		String version = wrapper.getIMakerCoreVersion();
-		assertTrue("iMaker API don't work as expected!", version.startsWith("iMaker 09.37.01"));
+		assertTrue("iMaker API don't work as expected!", version.startsWith("iMaker 10.03.01"));
 	}
 
 	private IIMakerWrapper getWrapper(String stubPath) {

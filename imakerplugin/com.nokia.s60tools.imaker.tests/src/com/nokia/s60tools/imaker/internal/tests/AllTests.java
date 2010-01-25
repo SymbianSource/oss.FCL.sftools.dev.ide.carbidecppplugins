@@ -38,6 +38,7 @@ public class AllTests {
 		suite.addTestSuite(PatternsTest.class);
 		suite.addTest(com.nokia.s60tools.imaker.internal.iqrf.tests.AllTests.suite());
 		suite.addTest(com.nokia.s60tools.imaker.internal.model.iContent.tests.AllTests.suite());
+		suite.addTest(com.nokia.s60tools.imaker.internal.impmodel.tests.AllTests.suite());
 		//$JUnit-END$
 		return suite;
 	}

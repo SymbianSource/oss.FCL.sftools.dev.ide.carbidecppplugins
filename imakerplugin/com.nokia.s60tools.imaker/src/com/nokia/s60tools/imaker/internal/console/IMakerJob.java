@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +47,7 @@ import com.nokia.s60tools.imaker.exceptions.IMakerCoreExecutionException;
 import com.nokia.s60tools.imaker.exceptions.IMakerCoreNotFoundException;
 
 public class IMakerJob extends Job {
-	private List<String> command;
+	private File file;
 	public volatile boolean done = false;
 	private IIMakerWrapper wrapper;
 	private String epocroot;
@@ -62,9 +61,9 @@ public class IMakerJob extends Job {
 	public static final Pattern VARIABLE_PATTERN1 = Pattern.compile(".*\\s*=\\s*.([\\\\/].*).");
 	public static final Pattern VARIABLE_PATTERN2 = Pattern.compile(".*\\s*=\\s*.(.:.*).");
 	
-	public IMakerJob(String name, List<String> cmd, IIMakerWrapper wrapper) {
+	public IMakerJob(String name, File file, IIMakerWrapper wrapper) {
 		super(name);
-		this.command = cmd;
+		this.file = file;
 		this.wrapper = wrapper;
 		this.epocroot = IMakerUtils.getLocationDrive(wrapper.getTool().get(0));
 	}
@@ -80,7 +79,7 @@ public class IMakerJob extends Job {
 		//print command
 		infoStream.println(BUILD_START_MESSAGE);
 		infoStream.print(BUILD_CMD);
-		infoStream.println(wrapper.getBuildCommand(command));
+		infoStream.println(wrapper.getBuildCommand(file));
 
 		try {
 			PipedInputStream pin = new PipedInputStream();
@@ -88,9 +87,9 @@ public class IMakerJob extends Job {
 			
 			IMakerConsoleLogger logger = new IMakerConsoleLogger(pin);
 			logger.start();
-			
+						
 			boolean success = false;
-			success = wrapper.buildImage(command,pout);
+			success = wrapper.buildImage(file,pout);
 
 			// Stop the thread.
 			logger.done = true;

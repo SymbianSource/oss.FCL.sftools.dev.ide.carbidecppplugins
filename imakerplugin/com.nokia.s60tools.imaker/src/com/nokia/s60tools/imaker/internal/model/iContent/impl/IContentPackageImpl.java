@@ -297,7 +297,6 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.CORE);
 		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.ROFS2);
 		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.ROFS3);
-		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.UDA);
 
 		// Create resource
 		createResource(eNS_URI);

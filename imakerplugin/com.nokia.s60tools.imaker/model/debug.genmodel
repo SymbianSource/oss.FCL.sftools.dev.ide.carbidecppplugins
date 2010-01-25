@@ -7,6 +7,11 @@
   <foreignModel>debug.ecore</foreignModel>
   <genPackages prefix="IContent" basePackage="com.nokia.s60tools.imaker.internal.model"
       disposableProviderFactory="true" ecorePackage="debug.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="debug.ecore#//IMAGESECTION">
+      <genEnumLiterals ecoreEnumLiteral="debug.ecore#//IMAGESECTION/CORE"/>
+      <genEnumLiterals ecoreEnumLiteral="debug.ecore#//IMAGESECTION/ROFS2"/>
+      <genEnumLiterals ecoreEnumLiteral="debug.ecore#//IMAGESECTION/ROFS3"/>
+    </genEnums>
     <genClasses ecoreClass="debug.ecore#//ImageContent">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference debug.ecore#//ImageContent/entries"/>
     </genClasses>
@@ -16,6 +21,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute debug.ecore#//IbyEntry/location"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute debug.ecore#//IbyEntry/debug"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute debug.ecore#//IbyEntry/enabled"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute debug.ecore#//IbyEntry/statusMessage"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

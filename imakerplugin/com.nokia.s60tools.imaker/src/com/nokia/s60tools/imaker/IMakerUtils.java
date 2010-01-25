@@ -113,14 +113,17 @@ public class IMakerUtils {
 
 	/**
 	 * Parses the version of imaker from the specified string
-	 * @param output
+	 * @param versionString
 	 * @return
 	 */
-	public static String parseIMakerVersion(String output) {
+	public static String parseIMakerVersion(String versionString) {
+		if(versionString==null||versionString.equals("")) {
+			return null;
+		}
 		String verpattern = "\\d{2}\\.\\d{2}\\.\\d{2}";
-		Matcher matcher = Pattern.compile(verpattern).matcher(output);
+		Matcher matcher = Pattern.compile(verpattern).matcher(versionString);
 		if(matcher.find()) {
-			String version = output.substring(matcher.start(), matcher.end());
+			String version = versionString.substring(matcher.start(), matcher.end());
 			return version;
 		} else {
 			return null;			

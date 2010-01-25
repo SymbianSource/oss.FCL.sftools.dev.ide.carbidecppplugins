@@ -41,6 +41,9 @@ Export-Package: com.nokia.s60tools.imaker;
    org.eclipse.swt.widgets",
  com.nokia.s60tools.imaker.internal.console;x-friends:="com.nokia.s60tools.imaker.tests",
  com.nokia.s60tools.imaker.internal.dialogs;x-friends:="com.nokia.s60tools.imaker.tests",
+ com.nokia.s60tools.imaker.internal.impmodel;x-friends:="com.nokia.s60tools.imaker.tests",
+ com.nokia.s60tools.imaker.internal.impmodel.impl;x-friends:="com.nokia.s60tools.imaker.tests",
+ com.nokia.s60tools.imaker.internal.impmodel.util;x-friends:="com.nokia.s60tools.imaker.tests",
  com.nokia.s60tools.imaker.internal.iqrf;x-friends:="com.nokia.s60tools.imaker.tests";
   uses:="org.eclipse.emf.ecore,
    org.eclipse.emf.common.util",

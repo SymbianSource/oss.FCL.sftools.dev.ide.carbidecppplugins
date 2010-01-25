@@ -16,11 +16,9 @@
 */
 package com.nokia.s60tools.imaker.internal.model;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,21 +26,39 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import com.nokia.s60tools.imaker.IMakerKeyConstants;
 import com.nokia.s60tools.imaker.IMakerUtils;
 import com.nokia.s60tools.imaker.Messages;
 import com.nokia.s60tools.imaker.UIVariable;
+import com.nokia.s60tools.imaker.internal.impmodel.ConfigEntry;
+import com.nokia.s60tools.imaker.internal.impmodel.FileListEntry;
+import com.nokia.s60tools.imaker.internal.impmodel.ImpConstants;
+import com.nokia.s60tools.imaker.internal.impmodel.ImpDocument;
+import com.nokia.s60tools.imaker.internal.impmodel.ImpmodelFactory;
+import com.nokia.s60tools.imaker.internal.impmodel.OverrideConfiguration;
+import com.nokia.s60tools.imaker.internal.impmodel.OverrideFiles;
+import com.nokia.s60tools.imaker.internal.impmodel.Variable;
+import com.nokia.s60tools.imaker.internal.impmodel.util.BasicTokenizer;
+import com.nokia.s60tools.imaker.internal.impmodel.util.ImpResourceImpl;
 import com.nokia.s60tools.imaker.internal.managers.ProjectManager;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentFactory;
+import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
 import com.nokia.s60tools.imaker.internal.wrapper.IMakerWrapperPreferences;
 import com.nokia.s60tools.imaker.internal.wrapper.PlatsimManager;
 
 public class ImakerProperties extends Properties {
 	public static final String SEPARATOR			  = ":;";
+	public static final String IBYENTRY_FIELDS_SEPARATOR	  = ";";
 	public static final String GENERATED_FILES_FOLDER = "imakerplugin";
 	private static final long serialVersionUID = 1L;
 	private List<UIVariable> variables=null;
@@ -50,26 +66,102 @@ public class ImakerProperties extends Properties {
 	private boolean used = false;
 
 	/**
-	 * Create imaker properties from file
+	 * Create imaker properties from the given file
 	 * @param file
 	 * @return
 	 */
 	public static ImakerProperties createFromFile(IFile file) {
-		ImakerProperties imakerPreference = new ImakerProperties();
-
 		if(file!=null) {
-			try {
-				imakerPreference.load(file.getContents());
-			} catch (FileNotFoundException e) {
-				imakerPreference = null;
-			} catch (IOException e) {
-				imakerPreference = null;
-			} catch (CoreException e) {
-				e.printStackTrace();
+			ImpDocument model = getModel(file);
+			return convertModelToProperties(model);
+		}
+		return null;
+	}
+
+	private static ImakerProperties convertModelToProperties(ImpDocument model) {
+		ImakerProperties properties = new ImakerProperties();
+		if(model!=null) {
+			//main tab basic
+			addProperty(properties, IMakerKeyConstants.PRODUCT, model
+					.getVariable(ImpConstants.TARGET_PRODUCT), model);
+			addProperty(properties, IMakerKeyConstants.TARGET_LIST, model
+					.getVariable(ImpConstants.DEFAULT_GOALS), model);
+			addProperty(properties, IMakerKeyConstants.TYPE, model
+					.getVariable(ImpConstants.TYPE), model);
+			addProperty(properties, IMakerKeyConstants.SYMBOLFILES, model
+					.getVariable(ImpConstants.USE_SYMGEN), model);
+			addProperty(properties, IMakerKeyConstants.VERBOSE, model
+					.getVariable(ImpConstants.VERBOSE), model);
+			
+			//platsim variables
+			addProperty(properties, IMakerKeyConstants.PLATSIM_INSTANCE, model
+					.getVariable(ImpConstants.PLATSIM_INSTANCE), model);
+			addProperty(properties, IMakerKeyConstants.PLATSIM_RUN, model
+					.getVariable(ImpConstants.PLATSIM_RUN), model);
+			
+			//additional variables
+			EList<Variable> vars = model.getVariables();
+			StringBuffer sb = new StringBuffer();
+			Variable variable;
+			for (int i = 0; i < vars.size(); i++) {
+				variable = vars.get(i);
+				sb.append(variable.getName()+"="+variable.getValue());
+				if(i<vars.size()-1) {
+					sb.append(" ");
+				}
+			}
+			if(!"".equals(sb.toString())) {
+				properties.put(IMakerKeyConstants.ADDITIONAL_PARAMETERS, sb.toString());				
+			}
+			
+			//files
+			EList<OverrideFiles> files = model.getOrideFiles();
+			List<IbyEntry> ibyEntries = new ArrayList<IbyEntry>();
+			if (!files.isEmpty()) {
+				OverrideFiles of = files.get(0);
+				EList<FileListEntry> entries = of.getEntries();
+				for (int i = 0; i < entries.size(); i++) {
+					FileListEntry fEntry = entries.get(i);
+					EList<ConfigEntry> actions = fEntry.getActions();
+					if (!actions.isEmpty()) {
+						ConfigEntry action = actions.get(0);
+						IbyEntry iby = IContentFactory.eINSTANCE.createIbyEntry();
+						iby.setEnabled(true);
+						iby.setFile(fEntry.getSource());
+						iby.setTarget(fEntry.getTarget());
+						iby.setLocation(IMAGESECTION.get(action.getLocation()));
+						ibyEntries.add(iby);
+					}
+				}
+			}
+			if(!ibyEntries.isEmpty()) {
+				properties.put(IMakerKeyConstants.DEBUGFILES, ibyEntries);
 			}
 		}
+		return properties;
+	}
 
-		return imakerPreference;
+	private static void addProperty(ImakerProperties properties,
+			String key, Variable var, ImpDocument model) {
+		if(var!=null) {
+			model.getVariables().remove(var);
+			properties.put(key, var.getValue());
+		}
+	}
+
+	private static ImpDocument getModel(IFile file) {
+		ResourceSetImpl rs = new ResourceSetImpl();
+		
+		URI uri = URI.createFileURI(file.getLocation().toFile().getAbsolutePath());
+		Resource resource = rs.createResource(uri);
+		try {
+			resource.load(null);
+			EList<EObject> contents = resource.getContents();
+			return (ImpDocument) contents.get(0);	
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
@@ -77,29 +169,128 @@ public class ImakerProperties extends Properties {
 	 * @param file
 	 * @return
 	 */
-	public void saveToFile(IFile file) {		
+	public void saveToFile(File file) {
 		if(file!=null) {
-			InputStream input = getAsInputStream();
+			ImpDocument model = getModel();
+			Resource resource = getResource(file);
+			resource.getContents().add(model);
 			try {
-				file.setContents(input, true, false,null);
-			} catch (CoreException e) {
+				resource.save(null);
+			} catch (IOException e) {
+				// TODO log?
 				e.printStackTrace();
-			}
+			}	
 		}
 	}
 	
+	private Resource getResource(File file) {
+		ResourceSetImpl rs = new ResourceSetImpl();
+		URI uri = URI.createFileURI(file.getAbsolutePath());
+		Resource resource = rs.createResource(uri);
+		return resource;	
+	}
+
+	/**
+	 * Constract Impmodel from these properties
+	 * @return
+	 */
+	private ImpDocument getModel() {
+		Properties clone = (Properties) clone();
+		ImpmodelFactory factory = ImpmodelFactory.eINSTANCE;
+		ImpDocument doc = factory.createImpDocument();
+
+		//save variables
+		addBasicVariables(clone, doc,factory);
+		addAdditionalVariables(clone, doc,factory);
+		
+		//save platsim variables
+		addPlatsimVariables(clone, doc,factory);
+		
+		//save override files
+		Object oEntries = clone.remove(IMakerKeyConstants.DEBUGFILES);
+		if(oEntries!=null) {
+			List<IbyEntry> entries = (List<IbyEntry>) oEntries;
+			OverrideFiles files = factory.createOverrideFiles();
+			OverrideConfiguration confs = factory.createOverrideConfiguration();
+			for (IbyEntry ibyEntry : entries) {
+				if(!ibyEntry.isEnabled()) {
+					continue; //Notice skipping disabled entries
+				}
+				FileListEntry fileEntry = factory.createFileListEntry();
+				ConfigEntry configEntry = factory.createConfigEntry();
+				fileEntry.setSource(ibyEntry.getFile());
+				fileEntry.setTarget(ibyEntry.getTarget());
+				files.getEntries().add(fileEntry);
+				
+				//
+				configEntry.setTarget(ibyEntry.getTarget());
+				configEntry.setAction("replace-add");
+				configEntry.setLocation(ibyEntry.getLocation().getName().toLowerCase());
+				confs.getEntries().add(configEntry);
+			}
+			if(!files.getEntries().isEmpty()) {
+				doc.getOrideFiles().add(files);
+				doc.getOrideConfs().add(confs);
+			}
+		}
+		
+		//save override confs
+		return doc;
+	}
+
+	private void addPlatsimVariables(Properties clone, ImpDocument doc,
+			ImpmodelFactory factory) {
+		addVariable(doc, factory, ImpConstants.PLATSIM_INSTANCE, (String) clone
+				.remove(IMakerKeyConstants.PLATSIM_INSTANCE));
+		addVariable(doc, factory, ImpConstants.PLATSIM_RUN, (String) clone
+				.remove(IMakerKeyConstants.PLATSIM_RUN));
+	}
+
+	private void addAdditionalVariables(Properties clone, ImpDocument doc,
+			ImpmodelFactory factory) {
+		String adds = (String) clone.remove(IMakerKeyConstants.ADDITIONAL_PARAMETERS);
+		if(adds==null) return;
+		BasicTokenizer bt = new BasicTokenizer(adds);
+		while (bt.hasMoreTokens()) {
+			String token = bt.nextToken();
+			String[] comps = token.split("=");
+			if(comps.length==2) {
+				int start = 0;
+				int end = comps[1].length();
+				if(comps[1].charAt(0)=='"') start++;
+				if(comps[1].charAt(comps[1].length()-1)=='"') end--;
+				addVariable(doc, factory, comps[0], comps[1].substring(start,end));
+			}
+		}
+	}
+
+	private void addBasicVariables(Properties clone, ImpDocument doc, ImpmodelFactory factory) {
+		addVariable(doc, factory, ImpConstants.TARGET_PRODUCT, (String) clone
+				.remove(IMakerKeyConstants.PRODUCT));
+		addVariable(doc, factory, ImpConstants.DEFAULT_GOALS, (String) clone
+				.remove(IMakerKeyConstants.TARGET_LIST));
+		addVariable(doc, factory, ImpConstants.TYPE, (String) clone
+				.remove(IMakerKeyConstants.TYPE));
+		addVariable(doc, factory, ImpConstants.USE_SYMGEN, (String) clone
+				.remove(IMakerKeyConstants.SYMBOLFILES));
+		addVariable(doc, factory, ImpConstants.VERBOSE, (String) clone
+				.remove(IMakerKeyConstants.VERBOSE));
+//		addVariable(doc, factory, ImpConstants.VERBOSE, (String) clone.remove(IMakerKeyConstants.VERBOSE));
+//		addVariable(doc, factory, ImpConstants.VERBOSE, (String) clone.remove(IMakerKeyConstants.VERBOSE));
+	}
+
+	private void addVariable(ImpDocument doc, ImpmodelFactory factory, String name, String value) {
+		Variable var;
+		if (value!=null) {
+			var = factory.createVariable();
+			var.setName(name);
+			var.setValue(value);
+			doc.getVariables().add(var);
+		}
+	}
+
 	public ImakerProperties() {}
 
-	public InputStream getAsInputStream() {
-		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		try {
-			store(bao, "iMaker properties");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		ByteArrayInputStream bs = new ByteArrayInputStream(bao.toString().getBytes());
-		return bs;
-	}
 	
 	/**
 	 * Parse the contents of this properties file and create imaker command that is executable
@@ -237,4 +428,18 @@ public class ImakerProperties extends Properties {
 	public boolean isUsed() {
 		return this.used;
 	}
+
+	@Override
+	public synchronized void store(OutputStream out, String comments)
+			throws IOException {
+		ImpDocument model = getModel();
+		URI uri = URI.createFileURI("sample.imp");
+		ImpResourceImpl res = new ImpResourceImpl(uri);
+
+		res.getContents().add(model);
+
+		res.save(out);
+	}
+
+	
 }

@@ -16,11 +16,12 @@
 */
 package com.nokia.s60tools.imaker.internal.actions;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -41,7 +42,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate;
 
-import com.nokia.s60tools.imaker.IEnvironment;
 import com.nokia.s60tools.imaker.IEnvironmentManager;
 import com.nokia.s60tools.imaker.IIMakerWrapper;
 import com.nokia.s60tools.imaker.IMakerPlugin;
@@ -69,7 +69,7 @@ public class Flashmenu implements IWorkbenchWindowPulldownDelegate {
 	/** private data members */
 	private MenuItem openDialogItem = null;
 	private Shell shell;
-	private IProject selectedProject;
+	private IResource selectedResource;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchWindowPulldownDelegate#getMenu(org.eclipse.swt.widgets.Control)
@@ -85,7 +85,7 @@ public class Flashmenu implements IWorkbenchWindowPulldownDelegate {
 		menu = new Menu(parent);
 
 		ImageDescriptor descriptor = IMakerPlugin.getImageDescriptor("icons/imakermenu16.png");
-		ProjectManager pm = new ProjectManager(selectedProject);
+		ProjectManager pm = new ProjectManager(selectedResource.getProject());
 		List<IResource> files = pm.getImakerFiles();
 		for(IResource file: files) {
 			IFile f = (IFile) file;
@@ -134,15 +134,30 @@ public class Flashmenu implements IWorkbenchWindowPulldownDelegate {
 	 */
 	public void run(IAction action) {
 		IEnvironmentManager manager = EnvironmentManager.getInstance();
-		IEnvironment env = manager.getEnvironmentByDrive(getSelectionRoot());
-		ImakerProperties run = env.getRunProperties();
-		
-		if(env!=null&&!run.isUsed()) {
-			MessageDialog.openInformation(shell, "Unable To Launch iMaker", "The selection cannot be launched, and there are no recent " +
-			"launches.\n Create new lauch using Open iMaker Dialog... from the pulldown menu.");			
+		if(selectedResource instanceof IFile) {
+			IFile file = (IFile) selectedResource;
+			if(file.getFileExtension().endsWith("imp")) {
+				runImpFile(file.getLocation().toFile());
+			}
 		} else {
-			executeProperties(run);
+			if (manager.getLastRun()!=null) {
+				runImpFile(manager.getLastRun());				
+			} else {
+				MessageDialog.openInformation(shell, "Unable To Launch iMaker", "The selection cannot be launched, please select an iMaker file (.imp) " +
+				"or\n create new lauch using Open iMaker Dialog action... from the pulldown menu.");
+			}
 		}
+	}
+
+	private void runImpFile(File file) {
+		IEnvironmentManager manager = EnvironmentManager.getInstance();
+		manager.setLastRun(file);
+		List<String> imaker = IMakerUtils.getImakerTool(getSelectionRoot());		
+		IIMakerWrapper wrapper = new IMakerWrapper(imaker);
+		IMakerJob job = new IMakerJob("Creating image", file ,wrapper);
+		job.setPriority(Job.LONG);
+		job.setRule(IMakerPlugin.getDefault().getImakerRule());
+		job.schedule();
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
@@ -150,25 +165,15 @@ public class Flashmenu implements IWorkbenchWindowPulldownDelegate {
 			IStructuredSelection ss = (IStructuredSelection) selection;
 			Object elem = ss.getFirstElement();
 			if(elem instanceof IResource) {
-				selectedProject = ((IResource)elem).getProject();
+				selectedResource = ((IResource)elem).getProject();
 			}
 		} else {
-			selectedProject = null;
+			selectedResource = null;
 		}
 	}
 
-	private void initializeAndRunImaker(List<String> command) {
-		String root = getSelectionRoot();
-		List<String> imaker = IMakerUtils.getImakerTool(root);
-		IIMakerWrapper wrapper = new IMakerWrapper(imaker);
-		IMakerJob job = new IMakerJob("Creating image", command,wrapper);
-		job.setPriority(Job.LONG);
-		job.setRule(IMakerPlugin.getDefault().getImakerRule());
-		job.schedule();
-	}
-
 	private String getSelectionRoot() {
-		return IMakerUtils.getProjectRootLocation(selectedProject);
+		return IMakerUtils.getProjectRootLocation(selectedResource);
 	}
 
 	/**
@@ -183,8 +188,8 @@ public class Flashmenu implements IWorkbenchWindowPulldownDelegate {
 		public void widgetSelected(SelectionEvent e) {
 			MenuItem selection = (MenuItem)e.widget;
 			if(selection==openDialogItem) {
-				try {			
-					ProjectManager projectManager = new ProjectManager(selectedProject);
+				try {
+					ProjectManager projectManager = new ProjectManager(selectedResource.getProject());
 					IEnvironmentManager manager = IMakerPlugin.getEnvironmentManager();
 					manager.setActiveEnvironment(getSelectionRoot());
 
@@ -211,30 +216,24 @@ public class Flashmenu implements IWorkbenchWindowPulldownDelegate {
 						ImakerProperties run = manager.getActiveEnvironment().getRunProperties();
 						if(!path.equals(ProjectManager.NEW_ITEM)) {
 							IFile file = (IFile)projectManager.getImakerFile(new Path(path));
-							ImakerProperties prop = ImakerProperties.createFromFile(file);
-							run.clear();
-							run.putAll(prop);
+							runImpFile(file.getLocation().toFile());
+						} else {
+							try {
+								File file = File.createTempFile("temp", ".imp");
+								run.saveToFile(file);
+								runImpFile(file);
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
 						}
-						executeProperties(run);
-						run.setUsed(true);
 					}
 				} catch(NullPointerException ne) {
 					ne.printStackTrace();
 				}
 			} else {
 				IFile file = (IFile) selection.getData();
-				if(file!=null) {
-					ImakerProperties props = ImakerProperties.createFromFile(file);
-					executeProperties(props);
-				}
+				runImpFile(file.getLocation().toFile());
 			}
-
 		}
-	}
-	private void executeProperties(ImakerProperties prop) {
-		String tempDirectory = System.getProperty("java.io.tmpdir"); 
-		String target = tempDirectory+ImakerProperties.GENERATED_FILES_FOLDER;
-		List<String> command = prop.parseImakerCommand(selectedProject, new Path(target));
-		initializeAndRunImaker(command);
 	}
 }

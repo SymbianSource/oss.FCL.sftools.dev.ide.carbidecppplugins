@@ -78,7 +78,6 @@ public class IMakerWrapper implements IIMakerWrapper {
 //	private String dTarget = null;
 	private Pattern blockBegin = Pattern.compile("-{30,}");
 
-	private OutputStream outputStream;
 	private List<String> tool;
 	private IMakerCoreExecutionException lastImakerException;
 
@@ -102,7 +101,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 		verifyExists();
 		params.clear();
 		params.add(IMakerWrapperPreferences.CMD_FETCH_VERSION);
-		List<String> version = executeCommand(params);
+		List<String> version = executeCommand(params,null);
 		String vers = "";
 		for (String line : version) {
 			if(line.startsWith("iMaker")) {
@@ -121,13 +120,26 @@ public class IMakerWrapper implements IIMakerWrapper {
 		}
 	}
 
+	private void verifyCompatibility() throws IMakerCoreNotFoundException, IMakerCoreExecutionException {
+		//verify exists
+		String minVersion = Messages.getString("PreferencesTab.22"); //$NON-NLS-1$
+		String curVersion = IMakerUtils.parseIMakerVersion(getIMakerCoreVersion());
+		if(curVersion==null) throw new IMakerCoreExecutionException("Unable to query version information!");
+		if(minVersion.compareTo(curVersion)>0) {
+			String msg = Messages.getString("Error.3");
+			msg = msg.replace("xxx", minVersion);
+			msg = msg.replace("yyy", curVersion);			
+			throw new IMakerCoreExecutionException(msg);
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see com.nokia.s60tools.imakerplugin.wrapper.IIMakerWrapper#getConfigurations(java.lang.String, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List<UIConfiguration> getConfigurations(IProgressMonitor monitor) 
 	throws IMakerCoreExecutionException, IMakerCoreNotFoundException {
 		this.monitor = monitor;
-		verifyExists();
+		verifyCompatibility();
 		List<UIConfiguration> configurations = getConfigurations((String)null);
 		return configurations;
 	}
@@ -166,7 +178,6 @@ public class IMakerWrapper implements IIMakerWrapper {
 				String pname = config.getConfigurationName();
 				if(pname != null && pname.equals(dProduct)) {
 					config.setDefaultConfig(true);
-//					config.setDefaultTarget(dTarget);
 					break;
 				}
 			}			
@@ -183,7 +194,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 		Pattern product = Pattern.compile("\\s*IMAKER_CONFMK.*image_conf_(.*)\\.mk.\\s*");
 //		Pattern target  = Pattern.compile("\\s*TARGET_DEFAULT\\s*=\\s*.(.*).\\s*");
 		try {
-			List<String> lines = executeCommand(params);
+			List<String> lines = executeCommand(params,null);
 			for (String line : lines) {
 				Matcher matcher = product.matcher(line);
 				if(matcher.matches()) {
@@ -212,7 +223,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 		List<String> makeFiles;
 		params.clear();
 		params.add(IMakerWrapperPreferences.CMD_FETCH_CONFIGURATIONS);// + configPath
-		makeFiles = executeCommand(params);
+		makeFiles = executeCommand(params,null);
 		
 		// Remove redundant lines of information from makeFile list
 		if ((makeFiles != null) && (makeFiles.size() > 0)) {
@@ -235,7 +246,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 			IProgressMonitor mon) throws IMakerCoreExecutionException,
 			IMakerCoreNotFoundException {
 		this.monitor = mon;
-		verifyExists();
+		verifyCompatibility();
 		if(parameters==null||parameters.size()<2) {
 			return null;
 		}
@@ -252,7 +263,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 		params.addAll(parameters);
 		
 		builderRunning=true;
-		List<String> settingsList = executeCommand(params);
+		List<String> settingsList = executeCommand(params,null);
 		builderRunning=false;
 		
 		ArrayList<ConfigurationElement> elements = new ArrayList<ConfigurationElement>();
@@ -289,10 +300,9 @@ public class IMakerWrapper implements IIMakerWrapper {
 	 */
 	public boolean buildImage(List<String> cmdParams, OutputStream out) throws IMakerCoreExecutionException, 
 	IMakerCoreAlreadyRunningException, IMakerCoreNotFoundException {
-		this.outputStream = out;
-		verifyExists();
+		verifyCompatibility();
 		builderRunning = true;
-		List<String> ret = executeCommand(cmdParams);
+		List<String> ret = executeCommand(cmdParams,out);
 		builderRunning = false;
 		return getReturnStatus(ret);
 	}
@@ -343,11 +353,12 @@ public class IMakerWrapper implements IIMakerWrapper {
 
 	/**
 	 * Calls the iMaker on a command line and reads the output.
+	 * @param out 
 	 * 
 	 * @param  cmd additional arguments to be passed to the iMaker core.
 	 * @return Output of iMaker as list of Strings.
 	 */
-	private List<String> executeCommand(List<String> params) throws IMakerCoreExecutionException {
+	private List<String> executeCommand(List<String> params, OutputStream out) throws IMakerCoreExecutionException {
 		List<String> cmd = prepareCommand(params);
 
 		// Try to start a process to execute iMaker
@@ -369,7 +380,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 			Process process = builder.start();
 
 			// Start reading the output
-			StreamGobbler gobbler = new StreamGobbler(process.getInputStream(), outputStream);
+			StreamGobbler gobbler = new StreamGobbler(process.getInputStream(), out);
 			gobbler.start();
 			
 			ArrayList<String> output;
@@ -622,7 +633,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 				params.add(makeFile);
 				List<String> prodTargets; 
 				try {
-					prodTargets = executeCommand(params);
+					prodTargets = executeCommand(params,null);
 				} catch (IMakerCoreExecutionException e) {
 					this.lastImakerException = e;
 					if(monitor != null) {
@@ -659,7 +670,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 				params.set(0, IMakerWrapperPreferences.CMD_FETCH_CONFIGURATION);
 				List<String> settingsList;
 				try {
-					settingsList = executeCommand(params);
+					settingsList = executeCommand(params,null);
 				} catch (IMakerCoreExecutionException e) {
 					this.lastImakerException = e;
 					if(monitor != null) {
@@ -760,13 +771,13 @@ public class IMakerWrapper implements IIMakerWrapper {
 	public String getWorkdir(String makefile) throws IMakerCoreNotFoundException, IMakerCoreAlreadyRunningException, IMakerCoreExecutionException {
 		String target = "help-variable-WORKDIR*-value";
 		String retValue = null;
-		verifyExists();
+		verifyCompatibility();
 		List<String> parameters = new ArrayList<String>();
 		parameters.add("-f");
 		parameters.add(makefile);
 		parameters.add(target);
 		
-		List<String> ret = executeCommand(parameters);
+		List<String> ret = executeCommand(parameters,null);
 		String output = ret.get(0);
 		for (String str : ret) {
 			if(str.startsWith("WORK")) {
@@ -817,7 +828,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 				monitor.subTask(Messages.getString("IMakerWrapper.26"));
 			}
 			StringBuilder sb = new StringBuilder();
-			List<String> ret = executeCommand(cmd);
+			List<String> ret = executeCommand(cmd,null);
 			for (String str : ret) {
 				Matcher matcher = pattern.matcher(str);
 				if(matcher.find()) {
@@ -850,15 +861,29 @@ public class IMakerWrapper implements IIMakerWrapper {
 		if(impFile==null||!impFile.exists()) {
 			throw new IMakerCoreExecutionException("Invalid imp file given!");
 		}
-		this.outputStream = out;
-		verifyExists();
+		verifyCompatibility();
 		
 		params.clear();
 		params.add("-f");
-		params.add("\""+impFile.getAbsolutePath()+"\"");
+		params.add(getFilePath(impFile));
 		builderRunning = true;
-		List<String> ret = executeCommand(params);
+		List<String> ret = executeCommand(params,out);
 		builderRunning = false;
 		return getReturnStatus(ret);
+	}
+
+	private String getFilePath(File impFile) {
+		String path = impFile.getAbsolutePath();
+		if (path.contains(" ")) {
+			return "\""+path+"\"";			
+		} else {
+			return path;
+		}
+	}
+
+	public String getBuildCommand(File impFile) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(tool.get(0) + " -f " + getFilePath(impFile));
+		return sb.toString();
 	}	
 }
