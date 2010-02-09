@@ -139,17 +139,6 @@ public class PreferencesTab extends CTabItem {
 		setControl(createControl(parent));
 	}
 	
-//	public void displayCurrentProperties() {
-//		selectedProperties = workstation.getCurrentProperties();
-//		if(selectedProperties!=null) {
-//			displayProperties(selectedProperties);
-//			if(!selectedProperties.getFilename().equals(ImakerProperties.CREATE_NEW)) {
-//				nameState = NAME_STATE.NAMED;
-//				changeEditState(EDIT_STATE.SAVED);				
-//			}
-//		}
-//		setTextField();
-//	}
 
 	private Control createControl(CTabFolder parent) {
 		// Create Top composite in top of the parent composite
@@ -569,9 +558,15 @@ public class PreferencesTab extends CTabItem {
 
 	private void refreshProduct(UIConfiguration product) {
 		if(product==null) return;
+		clearWidgets();
+		try {
+			product.load();
+		} catch (Throwable e) {
+			StatusHandler.handle(IStatus.ERROR,"An error has occurred while executing iMaker Core.",e);
+			return;
+		}
 		textProduct.setText(product.getConfigurationName());
 		textProduct.setData(product);
-		clearWidgets();
 		activeEnvironment.setCurrentProduct(product);
 
 		List<UITarget> targets = product.getFilteredTargets();
@@ -592,6 +587,9 @@ public class PreferencesTab extends CTabItem {
 		listSource.removeAll();
 		listTarget.removeAll();
 		resetAdditionalFields();
+		settingsTab.setInput(null);
+		tabDebug.clear();
+		platsimTab.clear();
 	}
 
 	private void fixVersionText() {

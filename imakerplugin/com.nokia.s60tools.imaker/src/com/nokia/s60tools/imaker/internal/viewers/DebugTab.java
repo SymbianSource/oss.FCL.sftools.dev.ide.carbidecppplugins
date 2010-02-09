@@ -322,7 +322,7 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 			
 			private boolean isWarning(Object element) {
 				IbyEntry entry = getEntry(element);
-				String location = "-"+entry.getLocation().toString().toUpperCase();
+				String location = " "+entry.getLocation().toString().toUpperCase()+" ";
 				String targets[] = mainTab.getSelectedTargets();
 				UIConfiguration pr = mainTab.getSelectedProduct();
 				for (int i = 0; i < targets.length; i++) {

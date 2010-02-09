@@ -51,7 +51,7 @@ public interface IIMakerWrapper {
 	 * @throws IMakerCoreNotFoundException 
 	 * @throws InterruptedException 
 	 */
-	public abstract List<UIConfiguration> getConfigurations(IProgressMonitor monitor) throws IMakerCoreNotFoundException,
+	public abstract List<UIConfiguration> getConfigurations(IProgressMonitor monitor, String makefile) throws IMakerCoreNotFoundException,
 	IMakerCoreExecutionException;
 
 

@@ -18,6 +18,7 @@
 package com.nokia.s60tools.imaker;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +27,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
+
+import com.nokia.s60tools.imaker.exceptions.IMakerCoreExecutionException;
+import com.nokia.s60tools.imaker.exceptions.IMakerCoreNotFoundException;
 import com.nokia.s60tools.imaker.internal.iqrf.Configuration;
 import com.nokia.s60tools.imaker.internal.iqrf.ConfigurationElement;
 import com.nokia.s60tools.imaker.internal.iqrf.Setting;
@@ -65,18 +74,21 @@ public class UIConfiguration {
 	private List<UITarget>   targets      = null;
 	private List<UIVariable> variables    = null;
 	private boolean          defaultConfig = false;
-	private String           defaultTarget = null;
 	
 
 	private Set<ISettingViewer> changeListeners = new HashSet<ISettingViewer>();
+	private IIMakerWrapper wrapper;
+	private boolean loaded = false;
 	
 	/**
 	 * Default constructor. Gets a Configuration object as a parameter
 	 * and goes through it to find the needed data.
 	 * 
 	 * @param conf Configuration object to analyze
+	 * @param wrapper 
 	 */
-	public UIConfiguration(Configuration conf) {
+	public UIConfiguration(Configuration conf, IIMakerWrapper wrapper) {
+		this.wrapper = wrapper;
 		if (conf != null) {
 			makeFileName = conf.getName();
 			filePath     = conf.getFilePath();
@@ -161,10 +173,6 @@ public class UIConfiguration {
 			}
 		}
 		return null;
-	}
-
-	public void setDefaultTarget(String target) {
-		this.defaultTarget = target;
 	}
 	
 	/**
@@ -305,12 +313,54 @@ public class UIConfiguration {
 	}
 
 	public UITarget getTarget(String name) {
-		String ret = null;
 		for (UITarget t: getAllTargets()) {
 			if(name.equals(t.getName())) {
 				return t;
 			}
 		}
 		return null;
-	}	
+	}
+
+	public void load() throws Throwable {
+		if(loaded ) {
+			return;
+		}
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		IRunnableWithProgress op = new IMakerCoreRunnable();
+		ProgressMonitorDialog progressMonitorDialog = new ProgressMonitorDialog(display.getActiveShell());
+		try {
+			progressMonitorDialog.run(true, false, op);
+		} catch (InvocationTargetException e) {
+			throw e.getTargetException();
+		} catch (InterruptedException e) {
+			throw e;
+		}
+		loaded=true;		
+	}
+
+	private class IMakerCoreRunnable implements IRunnableWithProgress {
+		public void run(IProgressMonitor monitor)
+		throws InvocationTargetException, InterruptedException {
+			try {
+				List<UIConfiguration> confs = wrapper.getConfigurations(monitor,getFilePath());
+				if(!confs.isEmpty()) {
+					UIConfiguration configuration = confs.get(0);
+					targets.clear();
+					targets.addAll(configuration.getAllTargets());
+					variables.clear();
+					variables.addAll(configuration.getVariables());
+					makeFileName = configuration.getConfigurationName();
+					filePath     = configuration.getFilePath();
+					productName = configuration.getProductName();
+					platformName = configuration.getPlatformName();					
+				}
+			} catch (IMakerCoreExecutionException e) {
+				InvocationTargetException te = new InvocationTargetException(e);
+				throw te;
+			} catch (IMakerCoreNotFoundException e) {
+				InvocationTargetException te = new InvocationTargetException(e);
+				throw te;
+			}
+		}
+	}
 }

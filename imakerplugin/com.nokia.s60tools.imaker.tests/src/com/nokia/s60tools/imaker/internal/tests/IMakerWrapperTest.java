@@ -50,11 +50,8 @@ public class IMakerWrapperTest extends IMakerCoreTest {
 			assertTrue("iMakerWrapper failed with stub " + stub, version.length()>1);
 			assertTrue("iMakerWrapper failed with stub " + stub, version.startsWith("iMaker"));
 
-			List<UIConfiguration> configs = wrapper.getConfigurations(null);
+			List<UIConfiguration> configs = wrapper.getConfigurations(null,null);
 			assertTrue("iMakerWrapper failed with stub " + stub, !configs.isEmpty());
-			UIConfiguration config = configs.get(0);
-			assertTrue("iMakerWrapper failed with stub " + stub, !config.getAllTargets().isEmpty());
-			assertTrue("iMakerWrapper failed with stub " + stub, !config.getVariables().isEmpty());
 
 			ArrayList<String> params = new ArrayList<String>();
 			params.add("test");

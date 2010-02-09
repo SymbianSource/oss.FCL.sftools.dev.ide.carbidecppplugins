@@ -136,52 +136,67 @@ public class IMakerWrapper implements IIMakerWrapper {
 	/* (non-Javadoc)
 	 * @see com.nokia.s60tools.imakerplugin.wrapper.IIMakerWrapper#getConfigurations(java.lang.String, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List<UIConfiguration> getConfigurations(IProgressMonitor monitor) 
+	public List<UIConfiguration> getConfigurations(IProgressMonitor monitor, String makefile) 
 	throws IMakerCoreExecutionException, IMakerCoreNotFoundException {
 		this.monitor = monitor;
 		verifyCompatibility();
-		List<UIConfiguration> configurations = getConfigurations((String)null);
+		List<UIConfiguration> configurations = getConfigurations(makefile);
 		return configurations;
 	}
 
 	private List<UIConfiguration> getConfigurations(String makefile) throws IMakerCoreExecutionException {
 		List<UIConfiguration> uiConfigs = new ArrayList<UIConfiguration>();
 		List<String> makeFiles=null;
+		loadDefaultData();
 		if(makefile==null||makefile.equals("")) {
+			if (monitor != null) {
+				monitor.beginTask(Messages.getString("IMakerWrapper.3"), 1);
+			}
 			makeFiles = queryMakefiles();
+			
+			for (String mk : makeFiles) {
+				Configuration item = createConfiguration(mk);
+				uiConfigs.add(new UIConfiguration(item,this));
+			}
+			
+			if(dProduct!=null) {
+				for(UIConfiguration config: uiConfigs) {
+					String pname = config.getConfigurationName();
+					if(pname != null && pname.equals(dProduct)) {
+						config.setDefaultConfig(true);
+						break;
+					}
+				}			
+			}
+			
+			if (monitor != null) {
+				monitor.done();
+			}
 		} else {
 			makeFiles = new ArrayList<String>();
 			makeFiles.add(makefile);
-		}
-		
-		if (monitor != null) {
-			monitor.beginTask(Messages.getString("IMakerWrapper.3"), (makeFiles.size()*2));
-		}
-		loadDefaultData();
-		Result result = parseResult(makeFiles);
-		
-		// Get configurations out of the result object
-		Iterator<Configuration> configIter = result.getConfigurations().iterator();
-		while (configIter.hasNext()) {
-			Configuration item = configIter.next();
-			if(item.getTargetrefs().size()==0) continue;
-			uiConfigs.add(new UIConfiguration(item));
-		}
-		if(uiConfigs.isEmpty()) {
-			throw lastImakerException;
-		}
-		if (monitor != null) {
-			monitor.done();
-		}
-		if(dProduct!=null) {
-			for(UIConfiguration config: uiConfigs) {
-				String pname = config.getConfigurationName();
-				if(pname != null && pname.equals(dProduct)) {
-					config.setDefaultConfig(true);
-					break;
-				}
+			
+			if (monitor != null) {
+				monitor.beginTask(Messages.getString("IMakerWrapper.3"), (makeFiles.size()*2));
+			}
+			
+			Result result = parseResult(makeFiles);
+			
+			// Get configurations out of the result object
+			Iterator<Configuration> configIter = result.getConfigurations().iterator();
+			while (configIter.hasNext()) {
+				Configuration item = configIter.next();
+				if(item.getTargetrefs().size()==0) continue;
+				uiConfigs.add(new UIConfiguration(item,this));
+			}
+			if(uiConfigs.isEmpty()) {
+				throw lastImakerException;
 			}			
+			if (monitor != null) {
+				monitor.done();
+			}
 		}
+		
 		return uiConfigs;
 	}
 
@@ -192,7 +207,6 @@ public class IMakerWrapper implements IIMakerWrapper {
 		params.clear();
 		params.add(IMakerWrapperPreferences.DEFAULT_DATA);// + configPath
 		Pattern product = Pattern.compile("\\s*IMAKER_CONFMK.*image_conf_(.*)\\.mk.\\s*");
-//		Pattern target  = Pattern.compile("\\s*TARGET_DEFAULT\\s*=\\s*.(.*).\\s*");
 		try {
 			List<String> lines = executeCommand(params,null);
 			for (String line : lines) {
@@ -204,15 +218,6 @@ public class IMakerWrapper implements IIMakerWrapper {
 						break;
 					}
 				}
-//				matcher = target.matcher(line);
-//				if(matcher.matches()) {
-//					String tr = matcher.group(1);
-//					if(!tr.equals("")) {
-//						dTarget = tr;
-//						System.out.println("default target = " + tr);
-//						continue;
-//					}
-//				}
 			}
 		} catch (IMakerCoreExecutionException e) {
 			e.printStackTrace();
@@ -277,7 +282,7 @@ public class IMakerWrapper implements IIMakerWrapper {
 		if (monitor != null) {
 			monitor.done();
 		}
-		return new UIConfiguration(config);
+		return new UIConfiguration(config,this);
 	}
 	
 	/* (non-Javadoc)

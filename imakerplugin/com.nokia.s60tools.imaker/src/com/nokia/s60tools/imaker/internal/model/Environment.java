@@ -140,7 +140,7 @@ public class Environment implements IEnvironment {
 		public void run(IProgressMonitor monitor)
 		throws InvocationTargetException, InterruptedException {
 			try {
-				configurations = getImakerWrapper().getConfigurations(monitor);
+				configurations = getImakerWrapper().getConfigurations(monitor,null);
 				if(configurations.size()==0) {
 					IMakerCoreExecutionException ex = new IMakerCoreExecutionException(Messages.getString("Error.1"));
 					InvocationTargetException te = new InvocationTargetException(ex);

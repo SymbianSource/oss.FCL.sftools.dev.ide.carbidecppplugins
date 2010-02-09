@@ -57,10 +57,10 @@ public class EnvironmentTest extends TestCase {
 	public void testLoad() throws Exception {
 		assertFalse(environment.isLoaded());
 		List<UIConfiguration> confs = new ArrayList<UIConfiguration>();
-		confs.add(new UIConfiguration(IQRFFactory.eINSTANCE.createConfiguration()));
+		confs.add(new UIConfiguration(IQRFFactory.eINSTANCE.createConfiguration(),null));
 		int numberOfconfs = confs.size();
-		expect(wrapperMock.getConfigurations(isA(IProgressMonitor.class)))
-		.andReturn(confs);
+		wrapperMock.getConfigurations(isA(IProgressMonitor.class),null);
+		expectLastCall().andReturn(confs).once();
 		
 		replay(wrapperMock);
 		List<UIConfiguration> configurations = environment.load();

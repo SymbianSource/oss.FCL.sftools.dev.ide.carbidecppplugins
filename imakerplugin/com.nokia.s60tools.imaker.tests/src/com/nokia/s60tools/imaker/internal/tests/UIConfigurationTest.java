@@ -84,7 +84,7 @@ public class UIConfigurationTest extends TestCase{
 		result.addTarget(target1);
 		result.addTarget(target2);
 		
-		uiConfig = new UIConfiguration(conf);
+		uiConfig = new UIConfiguration(conf,null);
 		
 	}
 

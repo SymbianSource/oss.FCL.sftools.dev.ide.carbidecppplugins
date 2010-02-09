@@ -144,7 +144,7 @@ public class SettingsViewerTest extends TestCase{
 		result.addTarget(target1);
 		result.addTarget(target2);
 		
-		UIConfiguration uiConfig = new UIConfiguration(conf);
+		UIConfiguration uiConfig = new UIConfiguration(conf,null);
 		settingsViewer = new SettingsViewer(composite);
 		settingsViewer.setUiConfiguration(uiConfig);
 
