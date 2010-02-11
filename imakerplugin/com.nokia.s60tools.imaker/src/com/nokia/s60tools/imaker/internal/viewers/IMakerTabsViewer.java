@@ -413,5 +413,10 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 	public Button getFRevertButton() {
 		return fRevertButton;
 	}
+	
+	public void restoreSelection()
+	{
+		fConfigWidget.select(0);
+	}
 
 }

@@ -699,8 +699,12 @@ public class PreferencesTab extends CTabItem {
 		}
 
 		if (!found) {
-			IStatus status = new Status(Status.WARNING,IMakerPlugin.PLUGIN_ID,"Unable to fill dialog ui, because product: "+targetProduct+" not found!");
+			IStatus status = new Status(Status.ERROR,IMakerPlugin.PLUGIN_ID,"Unable to fill dialog ui, because product: "+targetProduct+" not found!");
 			IMakerPlugin.getDefault().getLog().log(status);			
+			clearWidgets();
+			StatusHandler.handle(IStatus.ERROR,"Unable to fill dialog ui, because product: "+targetProduct+" not found!",null);	
+			tabsViewer.restoreSelection();
+			loadImakerFile(ProjectManager.NEW_ITEM);
 			return;
 		}
 		
@@ -900,6 +904,28 @@ public class PreferencesTab extends CTabItem {
 			if(file!=null) {
 				ImakerProperties prop = null;
 				prop = ImakerProperties.createFromFile(file);
+				
+				if (prop.isEmpty())
+				{
+					StatusHandler.handle(IStatus.ERROR,"Unable to load preferences from file "+file.getName()+". Invalid or corrupted IMP file.",null);	
+					tabsViewer.restoreSelection();
+					loadImakerFile(ProjectManager.NEW_ITEM);
+					return;
+				}
+				if (!prop.containsKey(IMakerKeyConstants.PRODUCT))
+				{
+					StatusHandler.handle(IStatus.ERROR,"Unable to load product from file "+file.getName()+". Invalid or corrupted IMP file.",null);	
+					tabsViewer.restoreSelection();
+					loadImakerFile(ProjectManager.NEW_ITEM);
+					return;
+				}
+				if (!prop.containsKey(IMakerKeyConstants.TYPE))
+				{
+					StatusHandler.handle(IStatus.ERROR,"Unable to load image type from file "+file.getName()+". Invalid or corrupted IMP file.",null);	
+					tabsViewer.restoreSelection();
+					loadImakerFile(ProjectManager.NEW_ITEM);
+					return;
+				}
 				fillUIForm(prop);				
 			}
 		} else {
