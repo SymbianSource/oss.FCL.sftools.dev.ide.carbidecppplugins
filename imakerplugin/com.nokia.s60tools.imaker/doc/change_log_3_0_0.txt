@@ -21,7 +21,7 @@ License changed from SFL to EPL
 Total number of unit tests almost doubled
 
 Error fixes
-
+Fixed invalid imp file selection problem
 
 Version 2.2.4
 ===========================================
