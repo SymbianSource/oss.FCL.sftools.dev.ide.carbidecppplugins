@@ -393,9 +393,12 @@ public class PreferencesTab extends CTabItem {
 			
 //			@Override
 			public void widgetSelected(SelectionEvent se) {
-				String item = listTarget.getItem(listTarget.getSelectionIndex());
-				UIConfiguration p = activeEnvironment.getCurrentProduct();
-				listTarget.setToolTipText(p.getTarget(item).getDescription());
+				int index = listTarget.getSelectionIndex();
+				if(index!=-1) {
+					String item = listTarget.getItem(index);
+					UIConfiguration p = activeEnvironment.getCurrentProduct();
+					listTarget.setToolTipText(p.getTarget(item).getDescription());					
+				}
 			}
 			
 //			@Override
@@ -493,7 +496,7 @@ public class PreferencesTab extends CTabItem {
 			UITarget tr = pr.getTarget(target);
 			if(tr.getSteps()==null) {
 				String targetSteps = activeEnvironment.getTargetSteps(target);
-				tr.setSteps(targetSteps);				
+				tr.setSteps(targetSteps);
 			}
 		}
 	}
@@ -543,7 +546,7 @@ public class PreferencesTab extends CTabItem {
 		List<UIConfiguration> configs;
 		try {
 			configs = activeEnvironment.getConfigurations();
-			UIConfiguration ret = null;
+			UIConfiguration ret = getSelectedProduct();
 			for (UIConfiguration config : configs) {
 				if(config.isDefaultConfig()) {
 					ret = config;
@@ -640,7 +643,7 @@ public class PreferencesTab extends CTabItem {
 		}
 	}
 
-	private Properties getUIValues() {
+	private ImakerProperties getUIValues() {
 		ImakerProperties prop = new ImakerProperties();
 		try {
 			UIConfiguration config = (UIConfiguration) textProduct.getData();
@@ -1000,5 +1003,29 @@ public class PreferencesTab extends CTabItem {
 
 	public UIConfiguration getSelectedProduct() {
 		return activeEnvironment.getCurrentProduct();
+	}
+
+
+	/**
+	 * Add the given target to the list of selected targets if
+	 * it is not already there
+	 * @param name
+	 */
+	public void addTarget(String newTarget) {
+		addToListTarget(new String[]{newTarget.toLowerCase()});
+	}
+
+
+	public void reload(String selection) {
+		if(ProjectManager.NEW_ITEM.equals(selection)) {
+			try {
+				ImakerProperties ui = getUIValues();
+				getSelectedProduct().reload();
+				fillUIForm(ui);
+			} catch (Throwable e) {
+				StatusHandler.handle(IStatus.ERROR,"An error has occurred while executing iMaker Core.",e);
+				return;
+			}
+		}
 	}
 }

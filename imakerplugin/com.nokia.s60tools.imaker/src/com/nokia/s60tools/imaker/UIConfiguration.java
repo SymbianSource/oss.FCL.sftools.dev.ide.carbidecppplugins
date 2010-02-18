@@ -321,6 +321,11 @@ public class UIConfiguration {
 		return null;
 	}
 
+	public void reload() throws Throwable {
+		loaded = false;
+		load();
+	}
+	
 	public void load() throws Throwable {
 		if(loaded ) {
 			return;

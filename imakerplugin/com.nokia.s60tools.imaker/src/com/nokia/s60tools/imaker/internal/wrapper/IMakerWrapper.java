@@ -816,10 +816,21 @@ public class IMakerWrapper implements IIMakerWrapper {
 		return this.tool;
 	}
 
-	public String getTargetSteps(String target, String makefile, IProgressMonitor monitor) {
+	public String getTargetSteps(String target, String makefile, IProgressMonitor monitor) throws IMakerCoreExecutionException {
 		if (monitor != null) {
-			monitor.beginTask(Messages.getString("IMakerWrapper.24"),2);
-			monitor.subTask(Messages.getString("IMakerWrapper.25"));
+			monitor.beginTask(Messages.getString("IMakerWrapper.29"),10);
+		}
+		String ret = getTargetSteps2(target, makefile, monitor,false); 
+		if(monitor!=null) {
+			monitor.done();
+		}
+		return ret;
+	}
+
+	private String getTargetSteps2(String target, String makefile,
+			IProgressMonitor monitor, boolean isRestart) throws IMakerCoreExecutionException {
+		if(monitor!=null) {
+			monitor.subTask(Messages.getString("IMakerWrapper.30")+ target);
 		}
 		Pattern pattern = Pattern.compile(".*\\s*=\\s*.(.*).");
 		List<String> cmd = new ArrayList<String>();
@@ -827,37 +838,54 @@ public class IMakerWrapper implements IIMakerWrapper {
 		cmd.add(makefile);
 		cmd.add(target);
 		cmd.add(IMakerWrapperPreferences.TARGET_STEPS);
-		try {
-			if(monitor!=null) {
-				monitor.worked(1);
-				monitor.subTask(Messages.getString("IMakerWrapper.26"));
-			}
-			StringBuilder sb = new StringBuilder();
-			List<String> ret = executeCommand(cmd,null);
-			for (String str : ret) {
-				Matcher matcher = pattern.matcher(str);
-				if(matcher.find()) {
-					int end = matcher.end(1);
-					int start = matcher.start(1);
-					String retValue = str.substring(start,end);
-					if(monitor!=null) {
-						monitor.worked(1);
-						monitor.done();
-					}
-					sb.append(retValue);
-					sb.append(" ");
-				}
-			}
-			String str = sb.toString();
-			if(str.equals("")) {
-				return null;
-			} else {
-				return str;
-			}
-		} catch (IMakerCoreExecutionException e) {
-			e.printStackTrace();
+		if(isRestart) {
+			cmd.add(IMakerWrapperPreferences.TARGET_STEPS_RESTARTS);
 		}
-		return null;
+		StringBuilder sb = new StringBuilder();
+		List<String> ret = executeCommand(cmd,null);
+		for (String str : ret) {
+			Matcher matcher = pattern.matcher(str);
+			if(matcher.find()) {
+				int end = matcher.end(1);
+				int start = matcher.start(1);
+				String retValue = str.substring(start,end);
+				if(retValue.contains(" RESTART")) {
+					String subRet = getTargetSteps2(target,makefile,monitor,true);
+					if(subRet!=null) sb.append(subRet);
+				} else {
+					String[] parts = retValue.split(" ");
+					
+					for (int i = 0; i < parts.length; i++) {
+						String p = parts[i];
+						if(isTarget(p)) {
+							String subRet = getTargetSteps2(p,makefile,monitor, false); 
+							if(subRet!=null) sb.append(subRet);
+						} else {
+							sb.append(p);
+							sb.append(" ");							
+						}
+					}
+				}
+				break;
+			}
+		}
+		String str = sb.toString();
+		if(monitor!=null) {
+			monitor.worked(1);
+		}
+		if(str.equals("")) {
+			return null;
+		} else {
+			return str;
+		}
+	}
+
+	private boolean isTarget(String p) {
+		if(p!=null) {
+			String pl = p.toLowerCase();
+			return pl.equals(p);
+		}
+		return false;
 	}
 
 	public boolean buildImage(File impFile, OutputStream out)

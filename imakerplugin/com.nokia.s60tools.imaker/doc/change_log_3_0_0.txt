@@ -15,6 +15,8 @@ Ticket #1136: As a iMaker plugin user I don't want to load all the product confi
 Ticket #1188: As a Carbide.c++ user I want to modify my .IMP file using iMaker plugin
 Ticket #1137: Rename debug tab in iMaker plugin to something else
 Ticket #1055: As a SW developer I don't want to have temporary files in my Carbide.c++ workspace
+Ticket #1245: Update target selection required to avoid yellow warnings on content tab
+Ticket #1135: As a iMaker plugin user i want to reload available configurations (reload the current configuration)
 
 Enhancements
 License changed from SFL to EPL

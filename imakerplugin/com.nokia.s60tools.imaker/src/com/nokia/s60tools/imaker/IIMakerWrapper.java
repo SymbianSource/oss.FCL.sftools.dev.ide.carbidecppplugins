@@ -134,5 +134,5 @@ public interface IIMakerWrapper {
 	 * @param monitor, monitor object
 	 * @return
 	 */
-	public abstract String getTargetSteps(String target,String makefile, IProgressMonitor monitor);
+	public abstract String getTargetSteps(String target,String makefile, IProgressMonitor monitor) throws IMakerCoreExecutionException;
 }

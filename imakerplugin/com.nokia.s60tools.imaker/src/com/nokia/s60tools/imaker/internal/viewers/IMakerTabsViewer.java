@@ -76,6 +76,7 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 	private IEnvironmentManager environmentManager;
 	private PreferencesTab tabPreferences;
 	private Button fRestoreButton;
+	private Button fReloadButton;
 	private SettingsTab tabSettings;
 	private Combo fConfigWidget;
 	private Button deleteButton;
@@ -257,6 +258,7 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 		Composite buttonComp = new Composite(mainComp, SWT.NONE);
 		GridLayout buttonCompLayout = new GridLayout();
 		buttonCompLayout.numColumns = 2;
+		buttonCompLayout.makeColumnsEqualWidth = false;
 		buttonComp.setLayout(buttonCompLayout);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		buttonComp.setLayoutData(gd);
@@ -270,6 +272,18 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 		fRestoreButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
 				handleRestorePressed();
+			}
+		});
+		
+		fReloadButton = new Button(buttonComp, SWT.PUSH);
+		fReloadButton.setText(Messages.getString("IMakerTabsViewer.12")); //$NON-NLS-1$
+		fReloadButton.setToolTipText(Messages.getString("IMakerTabsViewer.13")); //$NON-NLS-1$
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_END);
+		fReloadButton.setLayoutData(gd);
+		SWTFactory.setButtonWidthHint(fReloadButton);
+		fReloadButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent evt) {
+				handleReloadPressed();
 			}
 		});
 		
@@ -287,12 +301,14 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 		tabPreferences.restore();
 	}
 		
+	private void handleReloadPressed() {
+		tabPreferences.reload(getSelectedItem());
+	}
+	
 	protected void handleRevertPressed() {
 		if(fTabFolder.getSelection() == tabSettings) {
 			tabPreferences.refreshSettingsTab(null);
-		} else {
-//			tabPreferences.revert();
-		}
+		} else {}
 	}
 
 	/**

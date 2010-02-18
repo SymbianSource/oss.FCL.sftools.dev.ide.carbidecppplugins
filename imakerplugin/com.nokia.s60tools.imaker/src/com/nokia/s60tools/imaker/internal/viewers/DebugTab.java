@@ -18,6 +18,7 @@
 package com.nokia.s60tools.imaker.internal.viewers;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -335,9 +336,8 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 						}
 					}
 				}
-				String message = Messages.getString("DebugTab.0");
-				entry.setStatusMessage(message.replace("xxx", location.substring(1)));
-				return true;
+				mainTab.addTarget(entry.getLocation().getName());
+				return false;
 			}
 
 			private boolean isError(Object element) {
@@ -463,7 +463,9 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 	 */
 	public void addToProperties(ImakerProperties prop) {
 		ImageContent input = getInput();
-		prop.put(IMakerKeyConstants.DEBUGFILES, input.getEntries());			
+		List<IbyEntry> ls = new ArrayList<IbyEntry>();
+		ls.addAll(input.getEntries());
+		prop.put(IMakerKeyConstants.DEBUGFILES, ls);			
 
 	}
 	

@@ -189,7 +189,11 @@ public class Environment implements IEnvironment {
 //				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					targetSteps = wrapper.getTargetSteps(target, getCurrentProduct().getFilePath(), monitor);
+					try {
+						targetSteps = wrapper.getTargetSteps(target, getCurrentProduct().getFilePath(), monitor);
+					} catch (IMakerCoreExecutionException e) {
+						throw new InvocationTargetException(e);
+					}
 				}
 			});
 		} catch (InvocationTargetException e) {

@@ -62,4 +62,5 @@ public class IMakerWrapperPreferences {
 	public static final String PLATSIM_STEP 			        = "step-PLATBLD";
 	public static final String USE_PLATSIM 			        	= "USE_PLATSIM";
 	public static final String TARGET_STEPS 			      	= "print-IMAKER_STEPS";
+	public static final String TARGET_STEPS_RESTARTS 	    	= "IMAKER_MKRESTARTS=1";
 }
