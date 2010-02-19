@@ -17,6 +17,7 @@ Ticket #1137: Rename debug tab in iMaker plugin to something else
 Ticket #1055: As a SW developer I don't want to have temporary files in my Carbide.c++ workspace
 Ticket #1245: Update target selection required to avoid yellow warnings on content tab
 Ticket #1135: As a iMaker plugin user i want to reload available configurations (reload the current configuration)
+Ticket #1099: As a developer I want to enable/disable selected files so that I don't need to manually select each one separately
 
 Enhancements
 License changed from SFL to EPL

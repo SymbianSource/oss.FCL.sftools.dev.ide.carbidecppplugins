@@ -19,6 +19,7 @@ package com.nokia.s60tools.imaker.internal.viewers;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -47,8 +49,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
 
-import com.nokia.s60tools.imaker.IMakerPlugin;
 import com.nokia.s60tools.imaker.IMakerKeyConstants;
+import com.nokia.s60tools.imaker.IMakerPlugin;
 import com.nokia.s60tools.imaker.Messages;
 import com.nokia.s60tools.imaker.UIConfiguration;
 import com.nokia.s60tools.imaker.UITarget;
@@ -131,6 +133,22 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		GridData gridData = new GridData(GridData.FILL,GridData.FILL,true,true);
 		gridData.heightHint = 180;
 		table.setLayoutData(gridData);
+		table.addKeyListener(new KeyListener() {
+			
+			public void keyReleased(KeyEvent e) {
+				if ((e.character == ' ')) {
+					StructuredSelection ss = (StructuredSelection) tableViewer.getSelection();
+					Iterator it = ss.iterator();
+					while (it.hasNext()) {
+						IbyEntry entry = (IbyEntry)it.next();
+						entry.setEnabled(!entry.isEnabled());
+						tableViewer.refresh(entry);						
+					}
+				}
+			}
+			
+			public void keyPressed(KeyEvent e) {}
+		});
 		
 		// create controls
 		Composite controls = getNewComposite(top);
