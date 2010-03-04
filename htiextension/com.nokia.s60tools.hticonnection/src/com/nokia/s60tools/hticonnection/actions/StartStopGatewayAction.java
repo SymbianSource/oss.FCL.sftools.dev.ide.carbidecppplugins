@@ -47,7 +47,7 @@ public class StartStopGatewayAction extends S60ToolsBaseAction {
 	public StartStopGatewayAction() {
 		super(startGatewayMsg,
 				startGatewayMsg,
-				IAction.AS_DROP_DOWN_MENU,
+				IAction.AS_PUSH_BUTTON,
 				ImageKeys.IMG_START_GATEWAY);
 		
 		setRunning(HtiConnection.getInstance().getConnectionStatus()

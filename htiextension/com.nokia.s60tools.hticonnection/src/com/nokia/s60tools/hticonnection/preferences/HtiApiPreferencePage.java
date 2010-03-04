@@ -17,6 +17,7 @@
 
 package com.nokia.s60tools.hticonnection.preferences;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -28,15 +29,13 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 import com.nokia.carbide.remoteconnections.RemoteConnectionsActivator;
-import com.nokia.carbide.remoteconnections.interfaces.IClientServiceSiteUI;
-import com.nokia.carbide.remoteconnections.interfaces.IConnection;
+import com.nokia.carbide.remoteconnections.interfaces.IClientServiceSiteUI2;
 import com.nokia.carbide.remoteconnections.interfaces.IService;
 import com.nokia.s60tools.hticonnection.HtiApiActivator;
 import com.nokia.s60tools.hticonnection.HtiConnectionHelpContextIDs;
 import com.nokia.s60tools.hticonnection.common.ProductInfoRegistry;
 import com.nokia.s60tools.hticonnection.connection.HTIService;
 import com.nokia.s60tools.hticonnection.core.HtiConnection;
-import com.nokia.s60tools.hticonnection.core.HtiConnection.ConnectionStatus;
 import com.nokia.s60tools.hticonnection.resources.Messages;
 
 /**
@@ -52,7 +51,7 @@ public class HtiApiPreferencePage extends PreferencePage implements
 	/**
 	 * UI component for configuring connection.
 	 */
-	private IClientServiceSiteUI clientSiteUI;
+	private IClientServiceSiteUI2 clientSiteUI;
 	
 	/**
 	 * Keeps information about if preferences page is created and open currently.
@@ -86,15 +85,15 @@ public class HtiApiPreferencePage extends PreferencePage implements
 		
 		// Client Site UI for creating and selecting connection.
 		IService service = RemoteConnectionsActivator.getConnectionTypeProvider().findServiceByID(HTIService.ID);
-		clientSiteUI = RemoteConnectionsActivator.getConnectionsManager().getClientSiteUI(service);
+		clientSiteUI = RemoteConnectionsActivator.getConnectionsManager().getClientSiteUI2(service);
 		clientSiteUI.createComposite(container);
 		
 		// Current connection needs to be selected or first in the list is selected.
-		IConnection currentConnection = HtiApiActivator.getPreferences().getCurrentConnection();
+		String currentConnection = HtiApiActivator.getPreferences().getConnectionID();
 		if(currentConnection != null) {
 			clientSiteUI.selectConnection(currentConnection);
 		}
-
+		
 		setHelps(parent);
 		
 		return container;
@@ -110,8 +109,8 @@ public class HtiApiPreferencePage extends PreferencePage implements
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
 	 */
-	public boolean performOk() {
-		doApply();
+	public boolean performOk() {	
+		doApply();		
 		return super.performOk();
 	}
 	
@@ -124,26 +123,14 @@ public class HtiApiPreferencePage extends PreferencePage implements
 	
 	/**
 	 * Apply settings
+	 * @throws CoreException 
 	 */
-	private void doApply(){
-		savePrefStoreValues();
-		
-		// Getting needed variables.
-		HtiConnection htiConnection = HtiConnection.getInstance();
-		IConnection currentConnection = clientSiteUI.getSelectedConnection();
-
-		// Restart datagateway if connection has been changed
-		
-		boolean isConnected = htiConnection.getConnectionStatus() != ConnectionStatus.SHUTDOWN;
-		boolean isNewConnection = (currentConnection != null) && !(currentConnection.equals(htiConnection.getCurrentConnection())); 
-
-		if (isConnected && isNewConnection) {
-			// Connection has been changed when connection is started.
-			restartDataGateway(currentConnection, false);
-		}
-		else if(!isConnected || currentConnection == null) {
-			// Connection isn't active or connections have been deleted. New connection can be set. 
-			HtiConnection.getInstance().setCurrentConnection(currentConnection, false);
+	private void doApply() {
+		savePrefStoreValues();	
+		try {		
+			HtiConnection.getInstance().changeConnection(clientSiteUI.getSelectedConnection());
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -166,23 +153,12 @@ public class HtiApiPreferencePage extends PreferencePage implements
 	 * @return True if saved successfully, else false
 	 */
 	private void savePrefStoreValues() {
-		IConnection currentConnection = clientSiteUI.getSelectedConnection();
+		String currentConnection = clientSiteUI.getSelectedConnection();
 		String connectionID = (currentConnection == null) ? HtiApiPreferenceConstants.DEFAULT_CONNECTION_ID 
-														: currentConnection.getIdentifier();
+														: currentConnection;
 		if (!connectionID.equals(HtiApiActivator.getPreferences().getConnectionID())) {
 			HtiApiActivator.getPreferences().setConnectionID(connectionID);
 		}
-	}
-
-	/**
-	 * Restarts Datagateway with settings from preference store.
-	 * @param isTesting True if testing connection and not trying to establish permanent connection.
-	 */
-	private boolean restartDataGateway(IConnection conn, boolean isTesting) {
-		HtiConnection htiConn = HtiConnection.getInstance();
-		htiConn.stopConnection();
-		htiConn.setCurrentConnection(conn, false);
-		return htiConn.startConnection(isTesting);
 	}
 
 	/**

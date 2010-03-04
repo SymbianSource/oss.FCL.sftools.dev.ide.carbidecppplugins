@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
@@ -29,9 +30,15 @@ import org.eclipse.ui.PartInitException;
 import com.nokia.carbide.remoteconnections.RemoteConnectionsActivator;
 import com.nokia.carbide.remoteconnections.interfaces.IConnectedService;
 import com.nokia.carbide.remoteconnections.interfaces.IConnection;
+import com.nokia.carbide.remoteconnections.interfaces.IService;
 import com.nokia.carbide.remoteconnections.interfaces.IConnectedService.IStatus;
 import com.nokia.carbide.remoteconnections.interfaces.IConnectedService.IStatus.EStatus;
-import com.nokia.carbide.remoteconnections.interfaces.IConnectionsManager.IConnectionsManagerListener;
+import com.nokia.carbide.remoteconnections.interfaces.IConnectionsManager.IConnectionListener;
+import com.nokia.carbide.remoteconnections.interfaces.IConnectionsManager.ISelectedConnectionInfo;
+import com.nokia.carbide.remoteconnections.internal.api.IConnection2;
+import com.nokia.carbide.remoteconnections.internal.api.IConnection2.IConnectionStatus;
+import com.nokia.carbide.remoteconnections.internal.api.IConnection2.IConnectionStatusChangedListener;
+import com.nokia.carbide.remoteconnections.internal.api.IConnection2.IConnectionStatus.EConnectionStatus;
 import com.nokia.s60tools.hticonnection.HtiApiActivator;
 import com.nokia.s60tools.hticonnection.actions.OpenPreferencePageAction;
 import com.nokia.s60tools.hticonnection.connection.HTIConnectedService;
@@ -41,6 +48,7 @@ import com.nokia.s60tools.hticonnection.gateway.DataGatewayManager;
 import com.nokia.s60tools.hticonnection.listener.HtiConnectionManager;
 import com.nokia.s60tools.hticonnection.preferences.HtiApiPreferenceConstants;
 import com.nokia.s60tools.hticonnection.preferences.HtiApiPreferencePage;
+import com.nokia.s60tools.hticonnection.preferences.HtiApiPreferences;
 import com.nokia.s60tools.hticonnection.resources.Messages;
 import com.nokia.s60tools.hticonnection.services.HTIVersion;
 import com.nokia.s60tools.hticonnection.ui.dialogs.ErrorDialogWithHelp;
@@ -51,7 +59,7 @@ import com.nokia.s60tools.util.cmdline.UnsupportedOSException;
 /**
  * This class manages current connection and holds it status information.
  */
-public class HtiConnection implements IConnectionsManagerListener {
+public class HtiConnection {
 
 	/**
 	 * Status of current connection. Used to device if new requests should
@@ -85,6 +93,21 @@ public class HtiConnection implements IConnectionsManagerListener {
 	private DataGatewayManager gatewayManager = null;
 	
 	/**
+	 * Listener for listening changes in connections.
+	 */
+	private IConnectionListener connectionListener = null;
+	
+	/**
+	 * Listener for listening changes in current connection status.
+	 */
+	private IConnectionStatusChangedListener currentConnectionStatusListener = null;
+	
+	/**
+	 * To point right connection when IConnectionStatusChangedListener is added and removed.
+	 */
+	private IConnection currentlyOpenConnection = null;
+	
+	/**
 	 * Enumeration for status of the current connection.
 	 */
 	public enum ConnectionStatus {
@@ -116,7 +139,11 @@ public class HtiConnection implements IConnectionsManagerListener {
 	 * Initializes listeners and settings.
 	 */
 	public void init() {
-		RemoteConnectionsActivator.getConnectionsManager().addConnectionStoreChangedListener(this);
+		// Add listeners
+		// Create "current connection" listener
+		connectionListener = new ConnectionChangedListener();
+		RemoteConnectionsActivator.getConnectionsManager().addConnectionListener(connectionListener);
+		
 		currentConnection = HtiApiActivator.getPreferences().getCurrentConnection();
 	}
 	
@@ -125,7 +152,9 @@ public class HtiConnection implements IConnectionsManagerListener {
 	 */
 	public void stop() {
 		setConnectionStatus(ConnectionStatus.SHUTDOWN);
-		RemoteConnectionsActivator.getConnectionsManager().removeConnectionStoreChangedListener(this);
+		// Remove listeners
+		RemoteConnectionsActivator.getConnectionsManager().removeConnectionListener(connectionListener);
+		
 		connectionChecker = null;
 		
 		if(gatewayManager != null){
@@ -163,7 +192,19 @@ public class HtiConnection implements IConnectionsManagerListener {
 		ConnectionStatus status = (isTesting) ? ConnectionStatus.TESTING : ConnectionStatus.CONNECTING;
 		setConnectionStatus(status);
 		
-		return startGateway(connection, isTesting);
+		boolean result = startGateway(connection, isTesting);
+		
+		if (result) {
+			currentlyOpenConnection = connection;
+			// Add status listener to the connection
+			if (currentlyOpenConnection instanceof IConnection2) {
+				currentConnectionStatusListener = new ConnectionStatusListener();
+				((IConnection2) currentlyOpenConnection)
+						.addStatusChangedListener(currentConnectionStatusListener);
+			}
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -216,6 +257,14 @@ public class HtiConnection implements IConnectionsManagerListener {
 	public void stopConnection() {
 		setConnectionStatus(ConnectionStatus.SHUTDOWN);
 		gatewayManager.stopGateway();
+		
+		// Remove status listener from the connection
+		if ((currentlyOpenConnection instanceof IConnection2) &&
+			(currentConnectionStatusListener != null)) {
+			((IConnection2) currentlyOpenConnection)
+					.removeStatusChangedListener(currentConnectionStatusListener);
+		}
+		currentlyOpenConnection = null;
 	}
 	
 	/**
@@ -461,7 +510,10 @@ public class HtiConnection implements IConnectionsManagerListener {
 			// ID of normal connection need to be saved to preferences so that it will be used later as default.
 			String connectionID = (currentConnection == null) ? HtiApiPreferenceConstants.DEFAULT_CONNECTION_ID 
 					: currentConnection.getIdentifier();
-			if (!connectionID.equals(HtiApiActivator.getPreferences().getConnectionID())) {
+						
+			// Set only if NOT already set as same or NOT set as "current connection".
+			if ((!connectionID.equals(HtiApiActivator.getPreferences().getConnectionID())) &&
+				(!HtiApiPreferences.SELECTION_ID_CURRENT.equals(HtiApiActivator.getPreferences().getConnectionID()))) {
 				HtiApiActivator.getPreferences().setConnectionID(connectionID);
 			}
 		}
@@ -475,44 +527,114 @@ public class HtiConnection implements IConnectionsManagerListener {
 		return currentConnection;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.nokia.carbide.remoteconnections.interfaces.IConnectionsManager.IConnectionsManagerListener#connectionStoreChanged()
+	/**
+	 * Call when connection changes.
+	 * @param newConnection new connection
+	 * @throws CoreException
 	 */
-	public void connectionStoreChanged() {
-		// Initializing needed variables.
-		IConnection currConn = getCurrentConnection();
-		if(currConn == null) {
-			// Nothing to do, if no connection is selected.
-			return;
-		}
-		String connID = currConn.getIdentifier();
-		Collection<IConnection> connections = RemoteConnectionsActivator.getConnectionsManager().getConnections();
+	public void changeConnection(String newConnection) throws CoreException {
+			
+		String currentConnectionId = null;
+		if (getCurrentConnection() != null) currentConnectionId = getCurrentConnection().getIdentifier();
+		boolean isConnected = getConnectionStatus() != ConnectionStatus.SHUTDOWN;
+		boolean isNewConnection = (newConnection != null) && !(newConnection.equals(currentConnectionId)); 
 		
-		// Checking if current connection still exists.
-		boolean isFound = false;
-		for(IConnection conn : connections) {	
-			if(conn.getIdentifier().equals(connID)) {
-				isFound = true;
-				break;
-			}
-		}
+		// Ensure that connection is ok.
+		IService service = RemoteConnectionsActivator.getConnectionTypeProvider().findServiceByID(HTIService.ID);
+		ISelectedConnectionInfo connectionInfo;
+		connectionInfo = RemoteConnectionsActivator.getConnectionsManager().ensureConnection(newConnection, service);
+		IConnection connection = connectionInfo.getConnection();
 		
-		if(!isFound) {
-			// Connection doesn't exist anymore. Setting current connection as null.
-			setCurrentConnection(null, false);
+		if (isConnected && isNewConnection) {
+			// Connection has been changed when connection is started.
+			restartDataGateway(connection, false);
+		}
+		else if(!isConnected || currentConnection == null) {
+			// Connection isn't active or connections have been deleted. New connection can be set. 
+			setCurrentConnection(connection, false);
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see com.nokia.carbide.remoteconnections.interfaces.IConnectionsManager.IConnectionsManagerListener#displayChanged()
+	
+	/**
+	 * Call when connection changes.
+	 * @param newConnection new connection
 	 */
-	public void displayChanged() {
-		// Not implemented.
+	public void changeConnection(IConnection newConnection) {
+		boolean isConnected = getConnectionStatus() != ConnectionStatus.SHUTDOWN;
+		boolean isNewConnection = 
+			(newConnection != null) && 
+			!(newConnection.equals(getCurrentConnection())); 
+		
+		if (isConnected && isNewConnection) {
+			// Connection has been changed when connection is started.
+			restartDataGateway(newConnection, false);
+		}
+		else if(!isConnected || currentConnection == null) {
+			// Connection isn't active or connections have been deleted. New connection can be set. 
+			setCurrentConnection(newConnection, false);
+		}
+	}
+	
+	/**
+	 * Restarts Datagateway with settings from preference store.
+	 * @param isTesting True if testing connection and not trying to establish permanent connection.
+	 */
+	public boolean restartDataGateway(IConnection conn, boolean isTesting) {
+		stopConnection();
+		setCurrentConnection(conn, false);
+		return startConnection(isTesting);
 	}
 	
 	//
 	// Private classes.
 	//
+	
+	/**
+	 * Listener for listening changes in current connection status.
+	 */
+	private class ConnectionStatusListener implements IConnectionStatusChangedListener {
+		
+		public void statusChanged(IConnectionStatus status) {		
+			// Stop connection when current connection device is removed.
+			if (status.getEConnectionStatus().equals(EConnectionStatus.IN_USE_DISCONNECTED)) {
+				stopConnection();
+				setCurrentConnection(null, false);
+			}
+		}
+	}
+	
+	/**
+	 * Listener for listening changes in connections.
+	 */
+	private class ConnectionChangedListener implements IConnectionListener {
+
+		public void connectionAdded(IConnection connection) {
+			// Do nothing.
+		}
+
+		public void connectionRemoved(IConnection connection) {
+			// Initializing needed variables.
+			IConnection currConn = getCurrentConnection();
+			if(currConn == null) {
+				// Nothing to do, if no connection is selected.
+				return;
+			}
+			
+			// Checking if current connection was the removed one.
+			if (currConn.getIdentifier().equals(connection.getIdentifier())) {
+				//If so, remove it and stop connection.
+				stopConnection();
+				setCurrentConnection(null, false);
+			}		
+		}
+
+		public void currentConnectionSet(IConnection connection) {
+			if (HtiApiActivator.getPreferences().getConnectionID().equals(HtiApiPreferences.SELECTION_ID_CURRENT)) {
+				changeConnection(connection);
+			}
+		}
+		
+	};
 	
 	/**
 	 * Thread that tests connection.
@@ -587,14 +709,14 @@ public class HtiConnection implements IConnectionsManagerListener {
 		/**
 		 * Connection that needs status update.
 		 */
-		private final IConnection onnectionToUpdate;
+		private final IConnection connectionToUpdate;
 
 		/**
 		 * Constructor.
-		 * @param onnectionToUpdate Connection that needs status update.
+		 * @param connectionToUpdate Connection that needs status update.
 		 */
-		public ConnectionStatusUpdater(IConnection onnectionToUpdate) {
-			this.onnectionToUpdate = onnectionToUpdate;
+		public ConnectionStatusUpdater(IConnection connectionToUpdate) {
+			this.connectionToUpdate = connectionToUpdate;
 		}
 
 		/* (non-Javadoc)
@@ -603,8 +725,8 @@ public class HtiConnection implements IConnectionsManagerListener {
 		public void run() {
 			
 			// Connection status needs to be updated in connected service.
-			if(onnectionToUpdate != null) {
-				Collection<IConnectedService> services = RemoteConnectionsActivator.getConnectionsManager().getConnectedServices(onnectionToUpdate);
+			if(connectionToUpdate != null) {
+				Collection<IConnectedService> services = RemoteConnectionsActivator.getConnectionsManager().getConnectedServices(connectionToUpdate);
 				// Collection can be null if getting services for test connection.
 				if(services != null) {
 					for(IConnectedService service : services) {
@@ -620,12 +742,17 @@ public class HtiConnection implements IConnectionsManagerListener {
 				view.updateActionButtonStates();
 				
 				// Updating connection description.
+				String displayName = "";
+				if(connectionToUpdate != null){
+					displayName = connectionToUpdate.getDisplayName();
+				}
+				
 				switch (getConnectionStatus()) {
 				case CONNECTED:
-					view.updateDescription(Messages.getString("HtiConnection.Connected_ToolBar_Msg") + onnectionToUpdate.getDisplayName()); //$NON-NLS-1$
+					view.updateDescription(Messages.getString("HtiConnection.Connected_ToolBar_Msg") + displayName); //$NON-NLS-1$
 					break;
 				case CONNECTING:
-					view.updateDescription(Messages.getString("HtiConnection.Connecting_ToolBar_Msg") + onnectionToUpdate.getDisplayName()); //$NON-NLS-1$
+					view.updateDescription(Messages.getString("HtiConnection.Connecting_ToolBar_Msg") + displayName); //$NON-NLS-1$
 					break;
 				case SHUTDOWN:
 					view.updateDescription(Messages.getString("HtiConnection.NotConnected_ToolBar_Msg")); //$NON-NLS-1$

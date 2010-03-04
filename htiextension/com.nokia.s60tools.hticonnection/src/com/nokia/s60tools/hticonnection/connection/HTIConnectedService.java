@@ -20,7 +20,7 @@ package com.nokia.s60tools.hticonnection.connection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.osgi.framework.Version;
 
-import com.nokia.carbide.remoteconnections.interfaces.AbstractConnectedService;
+import com.nokia.carbide.remoteconnections.interfaces.AbstractConnectedService2;
 import com.nokia.carbide.remoteconnections.interfaces.AbstractSynchronizedConnection;
 import com.nokia.carbide.remoteconnections.interfaces.IService;
 import com.nokia.carbide.remoteconnections.interfaces.IConnectedService.IStatus.EStatus;
@@ -32,8 +32,8 @@ import com.nokia.s60tools.hticonnection.services.HTIVersion;
 /**
  * Connected service for HTI to contain connection information.
  */
-public class HTIConnectedService extends AbstractConnectedService {
-	
+public class HTIConnectedService extends AbstractConnectedService2 {
+		
 	/**
 	 * Constructor.
 	 * @param service Service that is connected.
@@ -48,15 +48,15 @@ public class HTIConnectedService extends AbstractConnectedService {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.nokia.carbide.remoteconnections.interfaces.AbstractConnectedService#runTestStatus(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see com.nokia.carbide.remoteconnections.interfaces.AbstractConnectedService2#runTestStatus(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected TestResult runTestStatus(IProgressMonitor monitor) {
-		if(!manualTesting) {
+		if(!externalTesting) {
 			// Not using automatic testing as it would take too much resources. Returning currently known status.
 			IStatus status = getStatusFromHtiConnection();
 			return new TestResult(status.getEStatus(), status.getShortDescription(), status.getLongDescription());
 		}
-		
+			
 		// Testing connection when user has ordered testing command from the settings wizard.
 		monitor.beginTask("Testing HTI Service", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
 		IStatus status = HtiConnection.getInstance().testConnection(connection);

@@ -37,6 +37,11 @@ import com.nokia.s60tools.hticonnection.core.HtiConnection;
  */
 public class HtiApiPreferences implements IHtiApiPreferences {
 
+	/**
+	 * The type of "current" type of connection.
+	 */
+	public static String SELECTION_ID_CURRENT = "com.nokia.carbide.remoteConnections.currentConnection";
+	
 	/* (non-Javadoc)
 	 * @see com.nokia.s60tools.hticonnection.preferences.IHtiApiPreferences#initDefaultValues()
 	 */
@@ -85,7 +90,9 @@ public class HtiApiPreferences implements IHtiApiPreferences {
 
 		List<IConnection> htiConnections = HtiConnection.getInstance().getHTIConnections();
 		
-		if(htiConnections.size() == 1) {
+		// Do not change default if it is "current connection".
+		if (!HtiApiActivator.getPreferences().getConnectionID().equals(HtiApiPreferences.SELECTION_ID_CURRENT) &&
+			htiConnections.size() == 1) {
 			// Only one compatible connection was found. Using it as default.
 			IConnection conn = htiConnections.get(0);
 			HtiApiActivator.getPreferences().setConnectionID(conn.getIdentifier());

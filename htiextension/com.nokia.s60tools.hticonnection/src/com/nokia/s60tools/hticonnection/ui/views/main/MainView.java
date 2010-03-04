@@ -204,9 +204,13 @@ public class MainView extends ViewPart implements IStringProvider {
 		scrollLockAction = new ScrollLockAction(this);
 		selectAllAction = new SelectAllAction(this);
 		startStopGatewayAction = new StartStopGatewayAction();
+		
+		// Menu is no longer needed after "current connection" -feature
+		/*
 		// Creator connection menu.
 		IMenuCreator creator = new ConnectionMenuCreator();
 		startStopGatewayAction.setMenuCreator(creator);
+		*/
 		
 		StringArrayClipboardCopyHandler copyHandler = new StringArrayClipboardCopyHandler();		
 		copyAction = new CopyFromStringProviderToClipboardAction(this, new ICopyActionHandler[]{ copyHandler });
