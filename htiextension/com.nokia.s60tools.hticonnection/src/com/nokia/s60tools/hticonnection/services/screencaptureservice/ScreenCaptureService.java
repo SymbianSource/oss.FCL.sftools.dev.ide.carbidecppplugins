@@ -24,6 +24,7 @@ import com.nokia.s60tools.hticonnection.exceptions.HTIException;
 import com.nokia.s60tools.hticonnection.exceptions.ServiceShutdownException;
 import com.nokia.s60tools.hticonnection.services.HTIScreenMode;
 import com.nokia.s60tools.hticonnection.services.IScreenCaptureService;
+import com.nokia.s60tools.hticonnection.services.ScreenCaptureData;
 import com.nokia.s60tools.util.console.IConsolePrintUtility;
 
 /**
@@ -55,12 +56,31 @@ public class ScreenCaptureService implements IScreenCaptureService{
 	}
 	
 	/* (non-Javadoc)
+	 * @see com.nokia.s60tools.hticonnection.services.IScreenCaptureService#captureFullScreenDelta(java.lang.String, int, long)
+	 */
+	public ScreenCaptureData captureFullScreenDelta(String imgMimeType, int colorDepth, long timeout) 
+								throws ServiceShutdownException, HTIException, ConnectionException{
+		ScreenCaptureDeltaRequest request = new ScreenCaptureDeltaRequest(imgMimeType, colorDepth, timeout);
+		RequestResult result = RequestQueueManager.getInstance().submit(request, printUtility);
+		return new ScreenCaptureData(result.getListData());
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.nokia.s60tools.hticonnection.services.IScreenCaptureService#resetScreenDelta(java.lang.String, int, long)
+	 */
+	public void resetScreenDelta(long timeout) 
+								throws ServiceShutdownException, HTIException, ConnectionException{
+		ResetScreenDeltaRequest request = new ResetScreenDeltaRequest(timeout);
+		RequestQueueManager.getInstance().submit(request, printUtility);
+	}
+	
+	/* (non-Javadoc)
 	 * @see com.nokia.s60tools.hticonnection.services.IScreenCaptureService#getScreenMode(long)
 	 */
 	public HTIScreenMode getScreenMode(long timeout) 
 								throws ServiceShutdownException, HTIException, ConnectionException{
-		GetScreenModeRequest request = new GetScreenModeRequest(timeout);
-		RequestResult result = RequestQueueManager.getInstance().submit(request, printUtility);
+		GetScreenModeRequest request = new GetScreenModeRequest(timeout);	
+		RequestResult result = RequestQueueManager.getInstance().submit(request, printUtility);	
 		return result.getScreenMode();
 	}
 }

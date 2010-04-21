@@ -510,10 +510,9 @@ public class HtiConnection {
 			// ID of normal connection need to be saved to preferences so that it will be used later as default.
 			String connectionID = (currentConnection == null) ? HtiApiPreferenceConstants.DEFAULT_CONNECTION_ID 
 					: currentConnection.getIdentifier();
-						
-			// Set only if NOT already set as same or NOT set as "current connection".
-			if ((!connectionID.equals(HtiApiActivator.getPreferences().getConnectionID())) &&
-				(!HtiApiPreferences.SELECTION_ID_CURRENT.equals(HtiApiActivator.getPreferences().getConnectionID()))) {
+			// Do not change default if it is "current connection".
+			if (!HtiApiActivator.getPreferences().getConnectionID().equals(HtiApiPreferences.SELECTION_ID_CURRENT) &&
+				!connectionID.equals(HtiApiActivator.getPreferences().getConnectionID())) {
 				HtiApiActivator.getPreferences().setConnectionID(connectionID);
 			}
 		}

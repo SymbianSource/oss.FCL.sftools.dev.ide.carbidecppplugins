@@ -226,4 +226,41 @@ public class HTIScreenMode {
 	public String toString() {
 		return "[screen " + index + ": " + width + "x" + height + " @ " + MODE[mode] + ROTATION[rotation] + ", focus: " + focusIndex + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + focusIndex;
+		result = prime * result + height;
+		result = prime * result + index;
+		result = prime * result + mode;
+		result = prime * result + rotation;
+		result = prime * result + width;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HTIScreenMode other = (HTIScreenMode) obj;
+		if (focusIndex != other.focusIndex)
+			return false;
+		if (height != other.height)
+			return false;
+		if (index != other.index)
+			return false;
+		if (mode != other.mode)
+			return false;
+		if (rotation != other.rotation)
+			return false;
+		if (width != other.width)
+			return false;
+		return true;
+	}
 }

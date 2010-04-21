@@ -18,8 +18,6 @@
 package com.nokia.s60tools.hticonnection.services;
 
 import com.nokia.s60tools.hticonnection.core.HtiConnection;
-import com.nokia.s60tools.hticonnection.listener.HtiConnectionManager;
-import com.nokia.s60tools.hticonnection.listener.IHtiConnectionListener;
 import com.nokia.s60tools.hticonnection.services.applicationcontrolservice.ApplicationControlService;
 import com.nokia.s60tools.hticonnection.services.connectiontestservice.ConnectionTestService;
 import com.nokia.s60tools.hticonnection.services.ftpservice.FTPService;
@@ -35,8 +33,8 @@ public class HTIServiceFactory {
 	/**
 	 * Gets HTI version to which HTI Connection is currently connected. Or null if connection
 	 * is down. Value for this query is got when connection is established and it is
-	 * up to date when connection started message comes by {@link IHtiConnectionListener}. 
-	 * See {@link HtiConnectionManager} for more information.
+	 * up to date when connection started message comes by {@link com.nokia.s60tools.hticonnection.listener.IHtiConnectionListener}. 
+	 * See {@link com.nokia.s60tools.hticonnection.listener.HtiConnectionManager} for more information.
 	 * @return HTI Version queried from HTI agent or null if connection is down.
 	 */
 	public static HTIVersion getCurrentHTIVersion() {
