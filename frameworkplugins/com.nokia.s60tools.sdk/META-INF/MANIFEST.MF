@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Carbide.c++ Extensions - SDK Manager Service
 Bundle-SymbolicName: com.nokia.s60tools.sdk
-Bundle-Version: 1.5.0
+Bundle-Version: 1.8.0
 Bundle-Activator: com.nokia.s60tools.sdk.internal.SdkPlugin
 Bundle-Vendor: Nokia
 Require-Bundle: org.eclipse.core.runtime,

@@ -69,13 +69,14 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	// width hint for all buttons in the page
 	final int BUTTON_WIDTH = 60;
 	// height hint for all lists in the page
-	final int LIST_HEIGHT = 50;
+	final int LIST_HEIGHT = 30;
 	
 	// filters for file selection dialogs
 	static final String SELGE_INI_FILTER = "selge.ini";
 	static final String SYMBOL_FILTER = "*.symbol";
 	static final String ZIP_FILTER = "*.zip";
 	static final String[] IMAGE_FILTER = {"*.fpsx", "*.img", "*.v??", ".c??", "*.*"};
+	static final String[] TRACE_FILTER = {"*.xml", "*.zip" };
 	
 	// wizard saves last entered values to these tags in dialog_settings.xml
 	static final String LAST_USED_SELGE_INI_FILES = "SelgeIniFiles"; //$NON-NLS-1$
@@ -84,6 +85,7 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	static final String LAST_USED_MAPFILES_FOLDER = "MapFilesFolder"; //$NON-NLS-1$
 	static final String LAST_USED_MAPZIP_FILES = "MapZipFiles"; //$NON-NLS-1$
 	static final String LAST_USED_IMAGE_FILES = "ImageFiles"; //$NON-NLS-1$
+	static final String LAST_USED_TRACE_FILES = "TraceFiles"; //$NON-NLS-1$
 	static final String LAST_USED_MAPFILE_TYPE = "LastUsedMapFileType"; //$NON-NLS-1$
 	static final String LAST_USED_SDK = "LastUsedSdk"; //$NON-NLS-1$
 
@@ -109,6 +111,8 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	protected Button buttonNoMapFilesRadio;
 	protected Button buttonAddSymbol;
 	protected Button buttonRemoveSymbol;
+	protected Button buttonAddTraceFile;
+	protected Button buttonRemoveTraceFile;
 	protected Button buttonAddImageFile;
 	protected Button buttonRemoveImageFile;
 	protected Combo comboMapFilesFolder;
@@ -117,6 +121,7 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	protected Group groupSymbolFiles;
 	protected Group groupMapFiles;
 	protected Group groupImageFiles;
+	protected Group groupTraceFiles;
 	protected Group groupSelgeSymbolRadios;
 	protected Label labelMapFilesFolder;
 	protected Label labelZip;
@@ -124,6 +129,7 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	protected Label labelNoMapFiles;
 	protected List listSymbols;
 	protected List listImageFiles;
+	protected List listTraceFiles;
 	
 	// owner can pass in ROM IDs so that we can check that correct symbol is selected
 	protected String[] romIds = null;
@@ -135,7 +141,7 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	protected String defaultSelgeIniFile = "\\\\Vagrp014\\groups4\\Builds\\S60RnD\\S60_5_0\\SelgeIniFile\\selge.ini"; //$NON-NLS-1$
 	
 	// defines whether image files selection should be visible in the page
-	boolean showImageFilesGroup = false;
+	boolean showImageAndTraceFilesGroup = false;
 	
 	// section where this wizard pages data is saved
 	IDialogSettings previousValuesSection;
@@ -154,18 +160,17 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	 */
 	public DebugMetadataWizardPage(String pageName, 
 									String title, 
-									boolean imageFilesGroup,
+									boolean imageAndTraceFilesGroup,
 									IDialogSettings section,
 									int maxSavedValues){
 		super(pageName);
 		MAX_SAVED_VALUES = maxSavedValues;
-		showImageFilesGroup = imageFilesGroup;
+		showImageAndTraceFilesGroup = imageAndTraceFilesGroup;
 		previousValuesSection = section;
 			
 		setTitle(title);
 			
 		setDescription(Messages.getString("DebugMetadataWizardPage.SelgeIniDescription")); //$NON-NLS-1$
-
 		setPageComplete(true);
 	 }
 	
@@ -182,6 +187,7 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	}
 
 	@Override
+	
 	public void setInitialFocus() {
 		if (buttonSelgeRadio.getSelection())
 			comboSelge.setFocus();
@@ -231,6 +237,7 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 		
 		setControl(composite);
 	}
+	
 
 	/**
 	 * Creates UI controls for selge.ini usage
@@ -346,8 +353,10 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 		createMapFilesGroup(composite);
 		
 		// if image files UI is wanted, create it
-		if (showImageFilesGroup)
+		if (showImageAndTraceFilesGroup) {
+			createTraceFilesGroup(composite);
 			createImageFilesGroup(composite);
+		}
 	}
 	
 	/**
@@ -507,6 +516,51 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 	}
 	
 	/**
+	 * Creates UI controls for OST trace dictionary files usage.
+	 *
+	 */
+	void createTraceFilesGroup(Composite parent) {
+		// Image files group
+		groupTraceFiles = new Group(parent, SWT.NONE);
+		GridData gd = new GridData(GridData.FILL_BOTH);
+		gd.horizontalSpan = 2;
+		gd.verticalIndent = 10;
+		GridLayout gl = new GridLayout();
+		gl.numColumns = 2;
+		groupTraceFiles.setLayout(gl);
+		groupTraceFiles.setText(Messages.getString("DebugMetadataWizardPage.TraceFiles")); //$NON-NLS-1$
+		groupTraceFiles.setLayoutData(gd);
+		
+		// OST trace dictionary file list
+		listTraceFiles = new List(groupTraceFiles, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		GridData gdHorizontalTop = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+		gdHorizontalTop.verticalSpan = 2;
+		gdHorizontalTop.heightHint = LIST_HEIGHT;
+		listTraceFiles.setLayoutData(gdHorizontalTop);
+
+		// read last used trace dictionary files and fill them into the list
+		String[] lastUsed = getPreviousPaths(LAST_USED_TRACE_FILES);
+		if (lastUsed != null) {
+			listTraceFiles.setItems(lastUsed);
+		}				
+
+		GridData gdButtons = new GridData();
+		gdButtons.widthHint =  BUTTON_WIDTH;
+		
+		// Add trace dictionary file button
+		buttonAddTraceFile = new Button(groupTraceFiles, SWT.PUSH);
+		buttonAddTraceFile.setText(Messages.getString("DebugMetadataWizardPage.Add")); //$NON-NLS-1$
+		buttonAddTraceFile.setLayoutData(gdButtons);
+		buttonAddTraceFile.addSelectionListener(this);
+
+		// Remove trace dictionary file button
+		buttonRemoveTraceFile = new Button(groupTraceFiles, SWT.PUSH);
+		buttonRemoveTraceFile.setText(Messages.getString("DebugMetadataWizardPage.Remove")); //$NON-NLS-1$
+		buttonRemoveTraceFile.setLayoutData(gdButtons);
+		buttonRemoveTraceFile.addSelectionListener(this);
+	}
+	
+	/**
 	 * Creates UI controls for image files usage.
 	 *
 	 */
@@ -563,10 +617,10 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 		
 		// show symbol group
 // ROWS COMMENTED SO THAT THEY CAN BE RESTORED INCASE SELGE.INI USAGE IS RESTORED		
-/*		gd = (GridData)groupSymbol.getLayoutData();
-		groupSymbol.setVisible(true);
-		gd.exclude = false;
-*/		
+//		gd = (GridData)groupSymbol.getLayoutData();
+//		groupSymbol.setVisible(true);
+//		gd.exclude = false;
+//		
 		// hide selge group
 		gd = (GridData)groupSelge.getLayoutData();
 		gd.exclude = true;
@@ -664,6 +718,15 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 		return listImageFiles.getItems();
 	}
 	
+	/**
+	 * Returns trace dictionary files selected by user. 
+	 */
+	public String[] getTraceFiles() {
+		assert listTraceFiles != null;
+
+		return listTraceFiles.getItems();
+	}
+
 	/**
 	 * Returns the provided ROM IDs 
 	 */
@@ -763,6 +826,47 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 			if (selectedItems != null && selectedItems.length > 0) {
 				listSymbols.remove(selectedItems);
 			}
+
+		// Add trace file button pressed
+		} else if (event.widget == buttonAddTraceFile) {
+			FileDialog dialog = new FileDialog(this.getShell(), SWT.OPEN | SWT.MULTI);
+			dialog.setText(Messages.getString("DebugMetadataWizardPage.SelectTraceFile")); //$NON-NLS-1$
+			String[] filterExt = TRACE_FILTER; 
+	        dialog.setFilterExtensions(filterExt);
+			String result = dialog.open();
+			// if user selected files, check that files don't already exist in the list
+			// and add them if they don't already exist.
+			if (result != null) {
+				String[] fileNames = dialog.getFileNames();
+				if (fileNames != null) {
+					String path = dialog.getFilterPath() + File.separator;
+					for (int j = 0; j < fileNames.length; j++) {
+						String filePath = path + fileNames[j];
+						String[] listItems = listTraceFiles.getItems();
+						if (listItems != null && listItems.length > 0) {
+							boolean found = false;
+							for (int i = 0; i < listItems.length; i++) {
+								String listItem = listItems[i];
+								if (listItem.compareToIgnoreCase(filePath) == 0) {
+									found = true;
+									break;
+								}
+							}
+							if (!found)
+								listTraceFiles.add(filePath);
+						} else {
+							listTraceFiles.add(filePath);
+						}
+					}
+				}
+			}
+		
+		// Remove OST trace file button pressed
+		} else if (event.widget == buttonRemoveTraceFile) {
+			int[] selectedItems = listTraceFiles.getSelectionIndices();
+			if (selectedItems != null && selectedItems.length > 0) {
+				listTraceFiles.remove(selectedItems);
+			}			
 
 			// Add image file button pressed
 		} else if (event.widget == buttonAddImageFile) {
@@ -1026,8 +1130,12 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 			saveValue(comboMapFilesZip.getText(), LAST_USED_MAPZIP_FILES, false);
 			saveValue(comboMapFilesFolder.getText(), LAST_USED_MAPFILES_FOLDER, false);
 			saveValue(comboSdkFolder.getText(), LAST_USED_SDK, true);
-			if (showImageFilesGroup)
+
+			if (showImageAndTraceFilesGroup) {
 				saveValues(listImageFiles.getItems(), LAST_USED_IMAGE_FILES);
+				saveValues(listTraceFiles.getItems(), LAST_USED_TRACE_FILES);
+			}
+			
 			int mapType = NO_MAP_FILES_RADIO;
 			if (buttonMapFilesFolderRadio.getSelection())
 				mapType = MAP_FILES_FOLDER_RADIO;
@@ -1071,10 +1179,13 @@ public abstract class DebugMetadataWizardPage extends S60ToolsWizardPage impleme
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(comboSdkFolder, helpContext);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(buttonShowSelgeDetails, helpContext);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(textSelgeDetails, helpContext);
-		if (showImageFilesGroup) {
+		if (showImageAndTraceFilesGroup) {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(listImageFiles, helpContext);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(buttonAddImageFile, helpContext);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(buttonRemoveImageFile, helpContext);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(listTraceFiles, helpContext);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(buttonAddTraceFile, helpContext);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(buttonRemoveTraceFile, helpContext);
 		}
 	}	
 	
