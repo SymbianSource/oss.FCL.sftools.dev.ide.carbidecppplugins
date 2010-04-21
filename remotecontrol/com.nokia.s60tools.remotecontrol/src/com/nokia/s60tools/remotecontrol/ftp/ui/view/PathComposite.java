@@ -17,7 +17,11 @@
 
 package com.nokia.s60tools.remotecontrol.ftp.ui.view;
 
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -28,8 +32,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
-import org.eclipse.swt.widgets.Text;
 
+import com.nokia.s60tools.remotecontrol.RemoteControlActivator;
 import com.nokia.s60tools.remotecontrol.resources.ImageKeys;
 import com.nokia.s60tools.remotecontrol.resources.ImageResourceManager;
 import com.nokia.s60tools.remotecontrol.resources.Messages;
@@ -39,12 +43,12 @@ import com.nokia.s60tools.remotecontrol.ui.AbstractUiFractionComposite;
  * Composite for displaying and editing current file path.
  */
 public class PathComposite extends AbstractUiFractionComposite
-			implements KeyListener, SelectionListener {
+			implements KeyListener, SelectionListener, IPropertyChangeListener {
 
 	/**
 	 * Editable text field containing path.
 	 */
-	private Text pathText;
+	private CCombo pathCombo;
 
 	/**
 	 * Button for going to current path.
@@ -55,6 +59,11 @@ public class PathComposite extends AbstractUiFractionComposite
 	 * Owner of this component.
 	 */
 	private final FtpView ftpView;
+	
+	/**
+	 * Class for path history management.
+	 */
+	private PathHistory pathHistory;
 	
 	/**
 	 * Constructor.
@@ -70,29 +79,34 @@ public class PathComposite extends AbstractUiFractionComposite
 	 * @see com.nokia.s60tools.remotecontrol.ui.AbstractUiFractionComposite#createControls()
 	 */
 	protected void createControls() {
+		
+		pathHistory = new PathHistory();
+		
 		// Path label.
 		Label pathLabel = new Label(this, SWT.HORIZONTAL);		
 		pathLabel.setText(Messages.getString("PathComposite.directoryPath_LabelText")); //$NON-NLS-1$
 		
-		// Text field containing path.
-		final int textFieldStyleBits = SWT.LEFT | SWT.SINGLE | SWT.BACKGROUND | SWT.BORDER;
-		pathText = new Text(this, textFieldStyleBits);
-		pathText.setEditable(true);
-		pathText.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+		// Combo field containing path and path history drop down.
+		pathCombo = new CCombo(this, SWT.BORDER);
+		// Fill path history.
+		pathCombo.setItems(pathHistory.getPathHistoryAsStringArray());
+		pathCombo.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 		
 		// Go button.
 		goPathButton = new Button(this, SWT.NONE);
 		goPathButton.setImage(ImageResourceManager.getImage(ImageKeys.IMG_GO_TO_DIRECTORY));
 		goPathButton.setToolTipText(Messages.getString("PathComposite.goButton_TooltipText")); //$NON-NLS-1$
-		
+						
 		// Adding listeners.
-		pathText.addKeyListener(this);
+		pathCombo.addKeyListener(this);
+		pathCombo.addSelectionListener(this);
 		goPathButton.addSelectionListener(this);
+		RemoteControlActivator.getPrefsStore().addPropertyChangeListener(this);
 		
 		goPathButton.setEnabled(false);
-		pathText.setEnabled(false);
+		pathCombo.setEnabled(false);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.nokia.s60tools.remotecontrol.ui.AbstractUiFractionComposite#createLayout()
 	 */
@@ -117,8 +131,11 @@ public class PathComposite extends AbstractUiFractionComposite
 	 */
 	public void dispose() {
 		super.dispose();
-		pathText.removeKeyListener(this);
+		// Remove listeners.
+		pathCombo.removeKeyListener(this);
+		pathCombo.removeSelectionListener(this);
 		goPathButton.removeSelectionListener(this);
+		RemoteControlActivator.getPrefsStore().removePropertyChangeListener(this);
 	}
 	
 	/* (non-Javadoc)
@@ -126,7 +143,7 @@ public class PathComposite extends AbstractUiFractionComposite
 	 */
 	@Override
 	public boolean setFocus() {
-		return pathText.setFocus();
+		return pathCombo.setFocus();
 	}
 	
 	/* (non-Javadoc)
@@ -136,7 +153,7 @@ public class PathComposite extends AbstractUiFractionComposite
 		if(e.keyCode == SWT.CR) {
 			// Updating directory listing when Return is pressed.
 			e.doit = false;
-			ftpView.updatePathThenRefresh(pathText.getText());
+			ftpView.updatePathThenRefresh(pathCombo.getText());
 		}
 	}
 
@@ -148,11 +165,12 @@ public class PathComposite extends AbstractUiFractionComposite
 	}
 
 	/**
-	 * Changes text in text field to path.
+	 * Changes text in text field to path and updates path history.
 	 * @param path New path.
 	 */
 	public void setPath(String path) {
-		pathText.setText(path);
+		pathCombo.setText(path);
+		pathHistory.addPathToHistory(new Path(path));
 	}
 
 	/* (non-Javadoc)
@@ -166,8 +184,8 @@ public class PathComposite extends AbstractUiFractionComposite
 	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 	 */
 	public void widgetSelected(SelectionEvent e) {
-		if(e.widget == goPathButton) {
-			ftpView.updatePathThenRefresh(pathText.getText());
+		if(e.widget == goPathButton || e.widget == pathCombo) {
+			ftpView.updatePathThenRefresh(pathCombo.getText());
 		}
 	}
 
@@ -177,6 +195,16 @@ public class PathComposite extends AbstractUiFractionComposite
 	 */
 	public void setConnected(boolean connected) {
 		goPathButton.setEnabled(connected);
-		pathText.setEnabled(connected);
+		pathCombo.setEnabled(connected);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent event) {
+		if (event.getProperty().equals(PathHistory.CACHE_NAME)) {
+			pathCombo.setItems(pathHistory.getPathHistoryAsStringArray());
+			pathCombo.update();
+		}		
 	}
 }

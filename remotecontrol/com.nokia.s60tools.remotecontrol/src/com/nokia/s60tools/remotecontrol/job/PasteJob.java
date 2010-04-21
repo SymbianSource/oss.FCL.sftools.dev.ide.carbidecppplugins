@@ -115,11 +115,48 @@ public class PasteJob extends Job implements IManageableJob {
 					// File name changed, but folder is same. Just renaming it, as
 					// file can not be moved to be different name.
 					service.renameFileDir(sourceFile, destFile, timeout);
-				} else {
+				} else {				
 					// File name changed. Has to copy file and then delete old file, as
 					// file can not be moved to be different name.
-					service.copyFileDir(sourceFile, destFile, timeout);
-					service.deleteFile(sourceFile, timeout);
+										
+					// Check if source file is a file or a directory.
+					String[] sourcePathDirs = service.listDirs(selectedPath, timeout);
+					
+					boolean sourceIsDir = false;
+					for (String directory : sourcePathDirs) {
+						if (directory.equals(selectedFile)) sourceIsDir = true;
+					}
+						
+					// Do we need to copy anything.
+					boolean doCopy = true;
+						
+					// If source is directory...
+					if (sourceIsDir) {
+						// Are there any files in source directory.
+						String[] sourceDirs = service.listDirs(sourceFile, timeout);
+						String[] sourceFiles = service.listFiles(sourceFile, timeout);
+						if ((sourceDirs.length == 0) && (sourceFiles.length == 0)) {
+							doCopy = false;
+						}
+					}
+					
+					// Copy source file or source directory if needed.
+					if (doCopy) {
+						// If there are files or folders inside source folder.
+						service.copyFileDir(sourceFile, destFile, timeout);
+					} else {
+						// If pasting an empty folder.
+						service.makeDir(destFile, timeout);
+					}
+
+					// If source is directory...
+					if (sourceIsDir) {
+						// ...delete it.
+						service.deleteDir(sourceFile, timeout);
+					} else { // If source is file...
+						// ...delete it.
+						service.deleteFile(sourceFile, timeout);
+					}
 				}
 				
 				break;

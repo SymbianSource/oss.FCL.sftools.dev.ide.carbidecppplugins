@@ -19,6 +19,7 @@
 package com.nokia.s60tools.remotecontrol.screen.ui.view;
 
 import java.io.ByteArrayInputStream;
+
 import java.util.Arrays;
 
 import org.eclipse.jface.action.Action;
@@ -64,6 +65,7 @@ import com.nokia.s60tools.hticonnection.exceptions.ServiceShutdownException;
 import com.nokia.s60tools.hticonnection.services.HTIScreenMode;
 import com.nokia.s60tools.hticonnection.services.HTIServiceFactory;
 import com.nokia.s60tools.hticonnection.services.IScreenCaptureService;
+import com.nokia.s60tools.hticonnection.services.ScreenCaptureData;
 import com.nokia.s60tools.remotecontrol.RemoteControlActivator;
 import com.nokia.s60tools.remotecontrol.actions.OpenPreferencePageAction;
 import com.nokia.s60tools.remotecontrol.keyboard.IKeyboardMediator;
@@ -78,6 +80,7 @@ import com.nokia.s60tools.remotecontrol.screen.ui.actions.ZoomAction;
 import com.nokia.s60tools.remotecontrol.screen.ui.actions.ZoomAction.ZoomFactor;
 import com.nokia.s60tools.remotecontrol.ui.AbstractUiFractionComposite;
 import com.nokia.s60tools.remotecontrol.ui.views.main.MainView;
+import com.nokia.s60tools.remotecontrol.util.ImageHelper;
 import com.nokia.s60tools.remotecontrol.util.RemoteControlConsole;
 
 /**
@@ -187,6 +190,11 @@ public class ScreenView extends AbstractUiFractionComposite implements PaintList
 	 * to keyboard mediator.
 	 */
 	private ScreenView instance;
+	
+	/**
+	 * Previously captured image data from the device screen.
+	 */
+	byte[] previousImageData;
 	
 	//
 	// Constants
@@ -566,9 +574,38 @@ public class ScreenView extends AbstractUiFractionComposite implements PaintList
 		IScreenCaptureService service = HTIServiceFactory.createScreenCaptureService(RemoteControlConsole.getInstance());
 		
 		try {
+			// Getting the current screen mode.
+			HTIScreenMode screenMode = service.getScreenMode(screenSettings.getTimeoutTime());
+			// If screen mode has changed, take full screen capture.
+			if (!screenMode.equals(screenSettings.getScreenMode())) {
+				previousImageData = null;
+			}		
+			screenSettings.setScreenMode(screenMode);
+			
 			// Capturing the image.
-			byte[] imagedata = service.captureFullScreen(IMAGE_TYPE, screenSettings.getColorChoice(), screenSettings.getTimeoutTime());
-
+			// If image not captured before, take a full screen capture.
+			byte[] imagedata = null;
+			if (previousImageData == null) {
+				service.resetScreenDelta(screenSettings.getTimeoutTime());
+				imagedata = service.captureFullScreenDelta(IMAGE_TYPE, screenSettings.getColorChoice(), screenSettings.getTimeoutTime()).getImageData();
+				previousImageData = imagedata;
+			} else { // If image captured earlier...
+				// ...capture only changed part of the image.
+				ScreenCaptureData captureData = service.captureFullScreenDelta(IMAGE_TYPE, screenSettings.getColorChoice(), screenSettings.getTimeoutTime());
+				
+				// If image not empty (changes have been made since last screen delta).
+				if (captureData.getImageData().length > 0) {
+					// Add captured delta image on top of previous screen image.
+					imagedata = ImageHelper.overlayImage(previousImageData, captureData.getImageData(), 
+							captureData.getTopLeftX(), captureData.getTopLeftY(), IMAGE_TYPE);
+				} else {
+					// No need to change the screen image.
+					imagedata = previousImageData;
+				}
+		        
+				// Replace previous image with changed image combination.
+		        previousImageData = imagedata;
+			}
 			// Converting bytes to image.
 			ByteArrayInputStream is = new ByteArrayInputStream(imagedata);
 			Image image = new Image(Display.getCurrent(), is);
@@ -586,11 +623,7 @@ public class ScreenView extends AbstractUiFractionComposite implements PaintList
 			}
 			
 			updateActionButtonStates();
-			
-			// Getting the current screen mode.
-			HTIScreenMode screenMode = service.getScreenMode(screenSettings.getTimeoutTime());
-			screenSettings.setScreenMode(screenMode);
-			
+						
 			// Screen captured successfully.
 			return true;
 			

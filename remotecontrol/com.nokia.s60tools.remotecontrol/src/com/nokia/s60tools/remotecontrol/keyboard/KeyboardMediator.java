@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.nokia.s60tools.hticonnection.exceptions.ServiceShutdownException;
 import com.nokia.s60tools.hticonnection.services.HTIServiceFactory;
 import com.nokia.s60tools.hticonnection.services.IKeyEventService;
-import com.nokia.s60tools.remotecontrol.RemoteControlActivator;
 import com.nokia.s60tools.remotecontrol.keyboard.BufKeyEvent.EventType;
 import com.nokia.s60tools.remotecontrol.resources.Messages;
 import com.nokia.s60tools.util.console.IConsolePrintUtility;
@@ -46,7 +45,7 @@ import com.nokia.s60tools.util.console.IConsolePrintUtility;
  * writer before all the text is written and the writer waits for some time
  * for screen refresh.
  * 
- * @see RemoteControlActivator#getKeyboardMediator
+ * @see com.nokia.s60tools.remotecontrol.RemoteControlActivator#getKeyboardMediator
  */
 public class KeyboardMediator implements IKeyboardMediator {
 		

@@ -309,6 +309,7 @@ public class ViewContentProvider implements IStructuredContentProvider {
 	 */
 	public boolean supportsCopyMoveRename() {
 		// Copy, move, and rename are supported in 1.91-> and 2.5-> versions.
+		// 1.91-> versions are used for 3.x devices and 2.5-> versions for 5.x devices.
 		if(isSupportedVersion(new HTIVersion(1, 91)) ||
 				isSupportedVersion(new HTIVersion(2, 5))) {
 			return true;

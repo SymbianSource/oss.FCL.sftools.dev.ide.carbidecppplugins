@@ -859,22 +859,15 @@ public class FtpUtils {
 			}
 
 			if(canWrite) {
-				if(contentProvider.getFileOperation() == OPERATION.COPY &&
-						sourceFiles[j] instanceof FtpFolderObject) {
-					// Copy operation for empty folders needs to be handled specially because
+				if(sourceFiles[j] instanceof FtpFolderObject) {
+					// Cut & Copy operation for empty folders needs to be handled specially because
 					// ftp copy copies contents of folder to target folder. If there is nothing in
-					// source folder, then copying fails. This is handled user friendly by
+					// source folder, then cut/paste and copy/paste fails. This is handled user friendly by
 					// creating new empty folder if necessary.
-					pasteCopiedFolder(contentProvider, sourcePath, sourceFile, destFilePath, destFileName, filesAndFolders);
+					pasteFolder(contentProvider, sourcePath, sourceFile, destFilePath, destFileName);
 				} else {
-					// Paste file.
-					PasteJob job = new PasteJob(Messages.getString("FtpUtils.PasteFileJob_Name") + sourceFile, //$NON-NLS-1$
-							sourceFile,
-							sourcePath,
-							destFileName,
-							destFilePath,
-							contentProvider.getFileOperation());
-					job.schedule();
+					// Paste file by using default handling.
+					doDefaultPasteOperation(contentProvider, sourcePath, destFilePath, sourceFile, destFileName);
 				}
 			}
 		}
@@ -883,6 +876,26 @@ public class FtpUtils {
 		if(contentProvider.getFileOperation() == OPERATION.CUT) {	
 			contentProvider.setClipboardFiles(new ArrayList<IFtpObject>(), "", OPERATION.NONE); //$NON-NLS-1$
 		}
+	}
+
+	/**
+	 * Does default file/directory paste that does not require any special considerations.
+	 * @param contentProvider Content provider
+	 * @param sourcePath Path for source file/directory.
+	 * @param destFilePath Path for target file/directory.
+	 * @param sourceFile Source file name.
+	 * @param destFileName Target file name.
+	 */
+	private static void doDefaultPasteOperation(ViewContentProvider contentProvider,
+			String sourcePath, String destFilePath, String sourceFile,
+			String destFileName) {
+		PasteJob job = new PasteJob(Messages.getString("FtpUtils.PasteFileJob_Name") + sourceFile, //$NON-NLS-1$
+				sourceFile,
+				sourcePath,
+				destFileName,
+				destFilePath,
+				contentProvider.getFileOperation());
+		job.schedule();
 	}
 
 	/**
@@ -933,10 +946,32 @@ public class FtpUtils {
 	 * @param destFileName Target file name.
 	 * @param destFilesAndFolders File and folder names in target path.
 	 */
-	private static void pasteCopiedFolder(ViewContentProvider contentProvider, String sourcePath,
-			String sourceFile, String destFilePath, String destFileName, String[] destFilesAndFolders) {
+	private static void pasteFolder(ViewContentProvider contentProvider, String sourcePath,
+			String sourceFile, String destFilePath, String destFileName) {
 		String sourceFilePath = addFileSepatorToEnd(sourcePath) + sourceFile;
 		String[] sourceFilesAndFolders = getFilesAndFolders(sourceFilePath);
+		String[] destFilesAndFolders = getFilesAndFolders(destFilePath);
+	
+		String targetFilePath = addFileSepatorToEnd(destFilePath) + destFileName;
+		
+		// Does destination folder already exist?
+		boolean destExists = false;
+		for (String fileFolder : destFilesAndFolders) {
+			if (fileFolder.equals(destFileName)) destExists = true; // ...yes it does.
+		}
+		
+		// If destination folder exists, delete it.
+		if (destExists) {
+			DeleteDirJob deleteDirJob = new DeleteDirJob(Messages.getString("FtpUtils.Delete_Folder_Job_Name") + " " + //$NON-NLS-1$ //$NON-NLS-2$
+					targetFilePath, targetFilePath);
+			deleteDirJob.schedule();
+		}
+		
+		// Create destination folder.
+		MakeDirJob makeDirJob = new MakeDirJob(Messages.getString("FtpUtils.Make_Dir_Job_Name") + " " + //$NON-NLS-1$ //$NON-NLS-2$
+				targetFilePath, targetFilePath);
+		makeDirJob.schedule();
+		destExists = true;
 		
 		if(sourceFilesAndFolders == null) {
 			// Failed to list files. Show message to user.
@@ -946,30 +981,20 @@ public class FtpUtils {
 			message.open();
 			
 		} else if(sourceFilesAndFolders.length == 0) {
-			// Empty source folder. Checking if target folder already exists.
-			for(String str : destFilesAndFolders) {
-				if(str.equalsIgnoreCase(destFileName)) {
-					// Trying to copy empty folder over existing folder, nothing to do.
-					return;
-				}
-			}
-
-			// Existing folder was not found. Need to create a new folder. Copying empty folder would fail.
-			String targetFilePath = addFileSepatorToEnd(destFilePath) + destFileName;
-			// Start job for making dir.
-			MakeDirJob job = new MakeDirJob(Messages.getString("FtpUtils.Make_Dir_Job_Name") + " " + //$NON-NLS-1$ //$NON-NLS-2$
-					targetFilePath, targetFilePath);
-			job.schedule();
+			// Empty source folder.
+			if(contentProvider.getFileOperation() == OPERATION.CUT){
+				// Trying to cut empty folder over existing folder, needs to remove cut folder.
+				DeleteDirJob deleteDirJob = new DeleteDirJob(Messages.getString("FtpUtils.Delete_Folder_Job_Name") + " " + //$NON-NLS-1$ //$NON-NLS-2$
+						sourceFilePath, sourceFilePath);
+				deleteDirJob.schedule();
+			}			
+			// Else trying to copy empty folder over existing folder, nothing to do.
+			return;
 			
-		} else {
-			// Paste file.
-			PasteJob job = new PasteJob(Messages.getString("FtpUtils.PasteFileJob_Name") + sourceFile, //$NON-NLS-1$
-					sourceFile,
-					sourcePath,
-					destFileName,
-					destFilePath,
-					contentProvider.getFileOperation());
-			job.schedule();
+		} else {			
+			// Copy and Cut of non-empty directories works well also with the default paste operation.
+			doDefaultPasteOperation(contentProvider, sourcePath, destFilePath, sourceFile,
+					destFileName);			
 		}
 	}
 }

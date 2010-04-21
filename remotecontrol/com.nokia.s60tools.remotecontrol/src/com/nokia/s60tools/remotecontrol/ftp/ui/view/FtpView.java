@@ -361,10 +361,9 @@ public class FtpView extends AbstractUiFractionComposite implements
 	 * @param manager Tool bar instance.
 	 */
 	private void fillViewToolBar(IToolBarManager manager) {	
-		manager.removeAll();
-		manager.add(downloadAction);
-		manager.add(downloadAsAction);
-		manager.add(uploadAction);
+		manager.removeAll();	
+		manager.add(makeDirAction);
+		manager.add(refreshAction);
 		manager.add(preferencesAction);
 		updateActionStates();
 		manager.update(true);
@@ -435,12 +434,11 @@ public class FtpView extends AbstractUiFractionComposite implements
 	 */
 	private void fillContextMenu(IMenuManager manager) {
 		manager.removeAll();
-		manager.add(makeDirAction);
-		manager.add(deleteAction);
 		manager.add(downloadAction);
 		manager.add(downloadAsAction);
-		manager.add(uploadAction);
 		manager.add(downloadAndOpenAction);
+		manager.add(uploadAction);
+		manager.add(deleteAction);
 		
 		manager.add(new Separator());
 		
@@ -454,8 +452,9 @@ public class FtpView extends AbstractUiFractionComposite implements
 			manager.add(new Separator());
 		}
 		
-		manager.add(preferencesAction);
+		manager.add(makeDirAction);
 		manager.add(refreshAction);
+		manager.add(preferencesAction);
 		updateActionStates();
 
 		manager.update(true);
@@ -475,11 +474,17 @@ public class FtpView extends AbstractUiFractionComposite implements
 	public void refresh(){
 		viewer.refresh();
 		pathComposite.setConnected(isConnected);
+		
 		String currentPath = contentProvider.getDirectoryPath();
+		
+		refreshAction.setEnabled(isConnected);
+		
 		if(currentPath != null) {
 			pathComposite.setPath(currentPath);
+			makeDirAction.setEnabled(isConnected);
 		} else {
 			pathComposite.setPath(""); //$NON-NLS-1$
+			makeDirAction.setEnabled(false);
 		}
 	}
 	
