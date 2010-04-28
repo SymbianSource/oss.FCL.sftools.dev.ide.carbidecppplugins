@@ -26,9 +26,11 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 
 import com.nokia.s60tools.imaker.IMakerKeyConstants;
 import com.nokia.s60tools.imaker.IMakerUtils;
+import com.nokia.s60tools.imaker.ImageFlasherHelpContextIDs;
 import com.nokia.s60tools.imaker.UIConfiguration;
 import com.nokia.s60tools.imaker.UIVariable;
 import com.nokia.s60tools.imaker.internal.model.ImakerProperties;
@@ -44,6 +46,7 @@ public class SettingsTab extends CTabItem {
 
 	private Control createControl(CTabFolder parent) {
 		Composite top = new Composite(parent,SWT.NONE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(top, ImageFlasherHelpContextIDs.IMAKERDIALOG_SETTINGSTAB);
 		settingsViewer = new SettingsViewer(top);
 		return top;
 	}

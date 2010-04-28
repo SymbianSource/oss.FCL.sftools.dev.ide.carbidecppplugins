@@ -50,7 +50,7 @@
  <extension point="org.eclipse.help.contexts">
  	<contexts
        file="html/contexts.xml"
-       plugin="com.nokia.s60tools.imakerplugin.help"/>
+       plugin="com.nokia.s60tools.imaker.doc.user"/>
  </extension>
 
 	

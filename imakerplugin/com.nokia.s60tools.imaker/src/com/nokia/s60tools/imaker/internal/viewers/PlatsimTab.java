@@ -33,10 +33,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 
 import com.nokia.s60tools.imaker.IEnvironment;
 import com.nokia.s60tools.imaker.IEnvironmentManager;
 import com.nokia.s60tools.imaker.IMakerKeyConstants;
+import com.nokia.s60tools.imaker.ImageFlasherHelpContextIDs;
 import com.nokia.s60tools.imaker.Messages;
 import com.nokia.s60tools.imaker.internal.managers.EnvironmentManager;
 import com.nokia.s60tools.imaker.internal.model.ImakerProperties;
@@ -66,6 +68,7 @@ public class PlatsimTab extends CTabItem implements IPropertyViewer {
 	
 	private Control createControl(CTabFolder parent) {
 		Composite top = new Composite(parent,SWT.FLAT);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(top, ImageFlasherHelpContextIDs.IMAKERDIALOG_PLATSIMTAB);
 		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		top.setLayoutData(layoutData);
 		top.setLayout(new GridLayout(1,false));

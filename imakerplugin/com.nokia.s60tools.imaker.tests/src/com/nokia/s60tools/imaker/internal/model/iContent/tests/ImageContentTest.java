@@ -19,6 +19,7 @@ package com.nokia.s60tools.imaker.internal.model.iContent.tests;
 
 import junit.framework.TestCase;
 
+import com.nokia.s60tools.imaker.internal.model.iContent.ACTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentFactory;
 import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
@@ -42,7 +43,7 @@ public class ImageContentTest extends TestCase {
 		assertTrue(content.getEntries().size()==0);
 		IbyEntry ie = IContentFactory.eINSTANCE.createIbyEntry();
 
-		ie.setDebug(true);
+		ie.setAction(ACTION.HIDE);
 		ie.setEnabled(false);
 		String file = "huuhaa.exe";
 		ie.setFile(file);

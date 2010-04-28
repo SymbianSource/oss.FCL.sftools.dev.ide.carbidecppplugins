@@ -133,7 +133,7 @@ public class ImpResourceLoadTests extends TestCase {
 		String content = "#comment1\nvar1 = foo\n" +
 		"define IMAGE_ORIDECONF\n" +
 		"\tekern.exe udeb core\n" +
-		"\tAbout.r01 hie rofs2\n" +
+		"\tAbout.r01 hide rofs2\n" +
 		"endef";
 		
 		populateTestFile(content);
@@ -158,7 +158,7 @@ public class ImpResourceLoadTests extends TestCase {
 				"#trace configurations\n" +
 				"define IMAGE_ORIDECONF\n" +
 				"\tekern.exe udeb core\n" +
-				"\tAbout.r01 hie rofs2\n" +
+				"\tAbout.r01 hide rofs2\n" +
 				"endef";
 
 		populateTestFile(content);
@@ -196,7 +196,7 @@ public class ImpResourceLoadTests extends TestCase {
 		"#trace configurations\n" +
 		"define IMAGE_ORIDECONF\n" +
 		"\tekern.exe udeb core\n" +
-		"\tAbout.r01 hie rofs2\n" +
+		"\tAbout.r01 hide rofs2\n" +
 		"endef";
 		
 		populateTestFile(content);

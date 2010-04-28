@@ -18,16 +18,12 @@
 
 package com.nokia.s60tools.imaker.internal.providers;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.TableViewer;
 
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
-import com.nokia.s60tools.imaker.internal.viewers.DebugTab;
 
 public class CheckBoxEditingSupport extends IbyEntryEditingSupport {
 	private final static int ENABLE_COLUMN_ID = 1;
@@ -49,50 +45,14 @@ public class CheckBoxEditingSupport extends IbyEntryEditingSupport {
 
 	@Override
 	protected Object getValue(Object element) {
-		Boolean ret = (column==ENABLE_COLUMN_ID)?new Boolean(getEntry(element).isEnabled()):new Boolean(getEntry(element).isDebug());
-		return ret;
+		return new Boolean(getEntry(element).isEnabled());
 	}
 
 	@Override
 	protected void setValue(Object element, Object value) {
 		Boolean newValue = (Boolean)value;
 		IbyEntry entry = getEntry(element);
-		if(column==ENABLE_COLUMN_ID) {
-			entry.setEnabled(newValue);
-		} else {
-			String dPath = getDebugVersion(entry.getFile(),newValue);
-			if(!dPath.equals(entry.getFile())) {
-				entry.setFile(dPath);
-				entry.setDebug(newValue);
-			} else {
-				return;
-			}
-		}
-		updateWarning(element);
+		entry.setEnabled(newValue);
 		getViewer().update(element, null);
-	}
-
-	private String getDebugVersion(String path, Boolean value) {
-		String pattern;
-		if(value) {
-			pattern = DebugTab.REL_PATTERN;
-		} else {
-			pattern = DebugTab.DEBUG_PATTERN;			
-		}
-		Pattern p = Pattern.compile(pattern);
-		Matcher matcher = p.matcher(path);
-		if (matcher.find()) {
-			int start = matcher.start(1);
-			int end = matcher.end(1);
-			String newPath;
-			if(value) {
-				newPath = path.substring(0, start) + "udeb" + path.substring(end);
-			} else {
-				newPath = path.substring(0, start) + "urel" + path.substring(end);
-			}
-			return newPath;
-		} else {
-			return path;
-		}
 	}
 }

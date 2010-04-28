@@ -2,7 +2,7 @@
 <feature
       id="com.nokia.carbide.extensions.imaker"
       label="Carbide.c++ Extensions - IMaker"
-      version="3.0.0"
+      version="3.1.0"
       provider-name="Nokia"
       plugin="com.nokia.s60tools.imaker">
 

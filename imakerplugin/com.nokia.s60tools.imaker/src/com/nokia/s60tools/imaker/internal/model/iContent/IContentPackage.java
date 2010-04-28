@@ -136,13 +136,13 @@ public interface IContentPackage extends EPackage {
 	int IBY_ENTRY__LOCATION = 2;
 
 	/**
-	 * The feature id for the '<em><b>Debug</b></em>' attribute.
+	 * The feature id for the '<em><b>Action</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int IBY_ENTRY__DEBUG = 3;
+	int IBY_ENTRY__ACTION = 3;
 
 	/**
 	 * The feature id for the '<em><b>Enabled</b></em>' attribute.
@@ -181,6 +181,17 @@ public interface IContentPackage extends EPackage {
 	 * @generated
 	 */
 	int IMAGESECTION = 2;
+
+
+	/**
+	 * The meta object id for the '{@link com.nokia.s60tools.imaker.internal.model.iContent.ACTION <em>ACTION</em>}' enum.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.ACTION
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.impl.IContentPackageImpl#getACTION()
+	 * @generated
+	 */
+	int ACTION = 3;
 
 
 	/**
@@ -248,15 +259,15 @@ public interface IContentPackage extends EPackage {
 	EAttribute getIbyEntry_Location();
 
 	/**
-	 * Returns the meta object for the attribute '{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#isDebug <em>Debug</em>}'.
+	 * Returns the meta object for the attribute '{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getAction <em>Action</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @return the meta object for the attribute '<em>Debug</em>'.
-	 * @see com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#isDebug()
+	 * @return the meta object for the attribute '<em>Action</em>'.
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getAction()
 	 * @see #getIbyEntry()
 	 * @generated
 	 */
-	EAttribute getIbyEntry_Debug();
+	EAttribute getIbyEntry_Action();
 
 	/**
 	 * Returns the meta object for the attribute '{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#isEnabled <em>Enabled</em>}'.
@@ -289,6 +300,16 @@ public interface IContentPackage extends EPackage {
 	 * @generated
 	 */
 	EEnum getIMAGESECTION();
+
+	/**
+	 * Returns the meta object for enum '{@link com.nokia.s60tools.imaker.internal.model.iContent.ACTION <em>ACTION</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for enum '<em>ACTION</em>'.
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.ACTION
+	 * @generated
+	 */
+	EEnum getACTION();
 
 	/**
 	 * Returns the factory that creates the instances of the model.
@@ -365,12 +386,12 @@ public interface IContentPackage extends EPackage {
 		EAttribute IBY_ENTRY__LOCATION = eINSTANCE.getIbyEntry_Location();
 
 		/**
-		 * The meta object literal for the '<em><b>Debug</b></em>' attribute feature.
+		 * The meta object literal for the '<em><b>Action</b></em>' attribute feature.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
 		 * @generated
 		 */
-		EAttribute IBY_ENTRY__DEBUG = eINSTANCE.getIbyEntry_Debug();
+		EAttribute IBY_ENTRY__ACTION = eINSTANCE.getIbyEntry_Action();
 
 		/**
 		 * The meta object literal for the '<em><b>Enabled</b></em>' attribute feature.
@@ -397,6 +418,16 @@ public interface IContentPackage extends EPackage {
 		 * @generated
 		 */
 		EEnum IMAGESECTION = eINSTANCE.getIMAGESECTION();
+
+		/**
+		 * The meta object literal for the '{@link com.nokia.s60tools.imaker.internal.model.iContent.ACTION <em>ACTION</em>}' enum.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @see com.nokia.s60tools.imaker.internal.model.iContent.ACTION
+		 * @see com.nokia.s60tools.imaker.internal.model.iContent.impl.IContentPackageImpl#getACTION()
+		 * @generated
+		 */
+		EEnum ACTION = eINSTANCE.getACTION();
 
 	}
 

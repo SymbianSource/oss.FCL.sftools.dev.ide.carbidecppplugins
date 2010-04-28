@@ -171,7 +171,6 @@ public class PreferencesTab extends CTabItem {
 			setHelpForControl(buttonVerbose, ImageFlasherHelpContextIDs.IMAKERPLUGIN_HELP_FLAGS);
 			setHelpForControl(textUserDefinedParameters, ImageFlasherHelpContextIDs.IMAKERPLUGIN_HELP_ADDITIONAL_PARAMS);
 		} catch( Exception e ) {
-			//Creating preferences dialog caused an exception
 			e.printStackTrace();
 		}
 		return container;
@@ -580,6 +579,11 @@ public class PreferencesTab extends CTabItem {
 		}
 		settingsTab.setInput(product);
 		textProduct.setToolTipText(product.getFilePath());
+		activatePlatsimTab(product);
+	}
+
+
+	private void activatePlatsimTab(UIConfiguration product) {
 		platsimTab.activate(product.isPlatsimConfiguration());
 	}
 
@@ -788,7 +792,10 @@ public class PreferencesTab extends CTabItem {
 			if(text!=null) {
 				text = text.trim();
 				if(!"".equals(text)) {
-					text = text +" " + getVariableString(modVariable);
+					String varString = getVariableString(modVariable);
+					if (text.indexOf(varString)==-1) {
+						text = text +" " + varString;
+					}
 				} else {
 					text = getVariableString(modVariable);
 				}
@@ -797,6 +804,7 @@ public class PreferencesTab extends CTabItem {
 			}
 			textUserDefinedParameters.setText(text);
 		}
+		activatePlatsimTab(activeEnvironment.getCurrentProduct());
 	}
 
 	private String getVariableString(UIVariable variable) {
@@ -924,7 +932,7 @@ public class PreferencesTab extends CTabItem {
 				}
 				if (!prop.containsKey(IMakerKeyConstants.TYPE))
 				{
-					StatusHandler.handle(IStatus.ERROR,"Unable to load image type from file "+file.getName()+". Invalid or corrupted IMP file.",null);	
+					StatusHandler.handle(IStatus.ERROR,"Unable to load image type from file "+file.getName()+". Invalid or corrupted IMP file. TYPE not given",null);	
 					tabsViewer.restoreSelection();
 					loadImakerFile(ProjectManager.NEW_ITEM);
 					return;

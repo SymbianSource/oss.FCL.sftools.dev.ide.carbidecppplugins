@@ -16,6 +16,7 @@
 */
 package com.nokia.s60tools.imaker.internal.model.iContent.impl;
 
+import com.nokia.s60tools.imaker.internal.model.iContent.*;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EObject;
@@ -91,6 +92,8 @@ public class IContentFactoryImpl extends EFactoryImpl implements IContentFactory
 		switch (eDataType.getClassifierID()) {
 			case IContentPackage.IMAGESECTION:
 				return createIMAGESECTIONFromString(eDataType, initialValue);
+			case IContentPackage.ACTION:
+				return createACTIONFromString(eDataType, initialValue);
 			default:
 				throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
 		}
@@ -106,6 +109,8 @@ public class IContentFactoryImpl extends EFactoryImpl implements IContentFactory
 		switch (eDataType.getClassifierID()) {
 			case IContentPackage.IMAGESECTION:
 				return convertIMAGESECTIONToString(eDataType, instanceValue);
+			case IContentPackage.ACTION:
+				return convertACTIONToString(eDataType, instanceValue);
 			default:
 				throw new IllegalArgumentException("The datatype '" + eDataType.getName() + "' is not a valid classifier");
 		}
@@ -148,6 +153,26 @@ public class IContentFactoryImpl extends EFactoryImpl implements IContentFactory
 	 * @generated
 	 */
 	public String convertIMAGESECTIONToString(EDataType eDataType, Object instanceValue) {
+		return instanceValue == null ? null : instanceValue.toString();
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public ACTION createACTIONFromString(EDataType eDataType, String initialValue) {
+		ACTION result = ACTION.get(initialValue);
+		if (result == null) throw new IllegalArgumentException("The value '" + initialValue + "' is not a valid enumerator of '" + eDataType.getName() + "'");
+		return result;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String convertACTIONToString(EDataType eDataType, Object instanceValue) {
 		return instanceValue == null ? null : instanceValue.toString();
 	}
 

@@ -16,6 +16,7 @@
 */
 package com.nokia.s60tools.imaker.internal.model.iContent.impl;
 
+import com.nokia.s60tools.imaker.internal.model.iContent.ACTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentPackage;
 import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
@@ -37,7 +38,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#getFile <em>File</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#getTarget <em>Target</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#getLocation <em>Location</em>}</li>
- *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#isDebug <em>Debug</em>}</li>
+ *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#getAction <em>Action</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#isEnabled <em>Enabled</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.impl.IbyEntryImpl#getStatusMessage <em>Status Message</em>}</li>
  * </ul>
@@ -107,24 +108,24 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 	protected IMAGESECTION location = LOCATION_EDEFAULT;
 
 	/**
-	 * The default value of the '{@link #isDebug() <em>Debug</em>}' attribute.
+	 * The default value of the '{@link #getAction() <em>Action</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #isDebug()
+	 * @see #getAction()
 	 * @generated
 	 * @ordered
 	 */
-	protected static final boolean DEBUG_EDEFAULT = false;
+	protected static final ACTION ACTION_EDEFAULT = ACTION.UDEB;
 
 	/**
-	 * The cached value of the '{@link #isDebug() <em>Debug</em>}' attribute.
+	 * The cached value of the '{@link #getAction() <em>Action</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @see #isDebug()
+	 * @see #getAction()
 	 * @generated
 	 * @ordered
 	 */
-	protected boolean debug = DEBUG_EDEFAULT;
+	protected ACTION action = ACTION_EDEFAULT;
 
 	/**
 	 * The default value of the '{@link #isEnabled() <em>Enabled</em>}' attribute.
@@ -253,8 +254,8 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public boolean isDebug() {
-		return debug;
+	public ACTION getAction() {
+		return action;
 	}
 
 	/**
@@ -262,11 +263,11 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public void setDebug(boolean newDebug) {
-		boolean oldDebug = debug;
-		debug = newDebug;
+	public void setAction(ACTION newAction) {
+		ACTION oldAction = action;
+		action = newAction == null ? ACTION_EDEFAULT : newAction;
 		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, IContentPackage.IBY_ENTRY__DEBUG, oldDebug, debug));
+			eNotify(new ENotificationImpl(this, Notification.SET, IContentPackage.IBY_ENTRY__ACTION, oldAction, action));
 	}
 
 	/**
@@ -325,8 +326,8 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 				return getTarget();
 			case IContentPackage.IBY_ENTRY__LOCATION:
 				return getLocation();
-			case IContentPackage.IBY_ENTRY__DEBUG:
-				return isDebug();
+			case IContentPackage.IBY_ENTRY__ACTION:
+				return getAction();
 			case IContentPackage.IBY_ENTRY__ENABLED:
 				return isEnabled();
 			case IContentPackage.IBY_ENTRY__STATUS_MESSAGE:
@@ -352,8 +353,8 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 			case IContentPackage.IBY_ENTRY__LOCATION:
 				setLocation((IMAGESECTION)newValue);
 				return;
-			case IContentPackage.IBY_ENTRY__DEBUG:
-				setDebug((Boolean)newValue);
+			case IContentPackage.IBY_ENTRY__ACTION:
+				setAction((ACTION)newValue);
 				return;
 			case IContentPackage.IBY_ENTRY__ENABLED:
 				setEnabled((Boolean)newValue);
@@ -382,8 +383,8 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 			case IContentPackage.IBY_ENTRY__LOCATION:
 				setLocation(LOCATION_EDEFAULT);
 				return;
-			case IContentPackage.IBY_ENTRY__DEBUG:
-				setDebug(DEBUG_EDEFAULT);
+			case IContentPackage.IBY_ENTRY__ACTION:
+				setAction(ACTION_EDEFAULT);
 				return;
 			case IContentPackage.IBY_ENTRY__ENABLED:
 				setEnabled(ENABLED_EDEFAULT);
@@ -409,8 +410,8 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 				return TARGET_EDEFAULT == null ? target != null : !TARGET_EDEFAULT.equals(target);
 			case IContentPackage.IBY_ENTRY__LOCATION:
 				return location != LOCATION_EDEFAULT;
-			case IContentPackage.IBY_ENTRY__DEBUG:
-				return debug != DEBUG_EDEFAULT;
+			case IContentPackage.IBY_ENTRY__ACTION:
+				return action != ACTION_EDEFAULT;
 			case IContentPackage.IBY_ENTRY__ENABLED:
 				return enabled != ENABLED_EDEFAULT;
 			case IContentPackage.IBY_ENTRY__STATUS_MESSAGE:
@@ -439,7 +440,7 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 	public void append(StringBuffer sb) {
 		sb.append(isEnabled());
 		sb.append(";");
-		sb.append(isDebug());
+		sb.append(getAction().getLiteral());
 		sb.append(";");
 		sb.append(getFile());
 		sb.append(";");
@@ -448,9 +449,13 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 		sb.append(getLocation());
 	}
 
+	/*
 	public boolean equals(Object obj) {
 		if(obj instanceof IbyEntry) {
 			IbyEntry other = (IbyEntry) obj;
+			if (super.equals(obj)==false) {
+				return false;
+			}
 			String f = getFile();
 			String t = getTarget();
 			if(f!=null&&t!=null&&f.equals(other.getFile())&&t.equals(other.getTarget())) {
@@ -467,4 +472,5 @@ public class IbyEntryImpl extends EObjectImpl implements IbyEntry {
 		}
 		return false;
 	}
+	*/
 } //IbyEntryImpl

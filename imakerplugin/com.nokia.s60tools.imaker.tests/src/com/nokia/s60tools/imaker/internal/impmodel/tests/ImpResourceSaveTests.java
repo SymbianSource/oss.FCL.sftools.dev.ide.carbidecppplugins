@@ -82,7 +82,7 @@ public class ImpResourceSaveTests extends TestCase {
 		assertEquals(comment.getComment(), cm.getComment());
 	}
 
-	public void testSavingDocumentWithVariabless() throws Exception {
+	public void testSavingDocumentWithVariables() throws Exception {
 		String name = "foo";
 		String value = "bar";
 		

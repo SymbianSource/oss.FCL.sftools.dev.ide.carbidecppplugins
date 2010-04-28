@@ -58,6 +58,13 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 	private EEnum imagesectionEEnum = null;
 
 	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	private EEnum actionEEnum = null;
+
+	/**
 	 * Creates an instance of the model <b>Package</b>, registered with
 	 * {@link org.eclipse.emf.ecore.EPackage.Registry EPackage.Registry} by the package
 	 * package URI value.
@@ -177,7 +184,7 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public EAttribute getIbyEntry_Debug() {
+	public EAttribute getIbyEntry_Action() {
 		return (EAttribute)ibyEntryEClass.getEStructuralFeatures().get(3);
 	}
 
@@ -206,6 +213,15 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 	 */
 	public EEnum getIMAGESECTION() {
 		return imagesectionEEnum;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public EEnum getACTION() {
+		return actionEEnum;
 	}
 
 	/**
@@ -243,12 +259,13 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 		createEAttribute(ibyEntryEClass, IBY_ENTRY__FILE);
 		createEAttribute(ibyEntryEClass, IBY_ENTRY__TARGET);
 		createEAttribute(ibyEntryEClass, IBY_ENTRY__LOCATION);
-		createEAttribute(ibyEntryEClass, IBY_ENTRY__DEBUG);
+		createEAttribute(ibyEntryEClass, IBY_ENTRY__ACTION);
 		createEAttribute(ibyEntryEClass, IBY_ENTRY__ENABLED);
 		createEAttribute(ibyEntryEClass, IBY_ENTRY__STATUS_MESSAGE);
 
 		// Create enums
 		imagesectionEEnum = createEEnum(IMAGESECTION);
+		actionEEnum = createEEnum(ACTION);
 	}
 
 	/**
@@ -288,7 +305,7 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 		initEAttribute(getIbyEntry_File(), ecorePackage.getEString(), "file", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getIbyEntry_Target(), ecorePackage.getEString(), "target", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getIbyEntry_Location(), this.getIMAGESECTION(), "location", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-		initEAttribute(getIbyEntry_Debug(), ecorePackage.getEBoolean(), "debug", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getIbyEntry_Action(), this.getACTION(), "action", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getIbyEntry_Enabled(), ecorePackage.getEBoolean(), "enabled", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getIbyEntry_StatusMessage(), ecorePackage.getEString(), "statusMessage", null, 0, 1, IbyEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
@@ -297,6 +314,17 @@ public class IContentPackageImpl extends EPackageImpl implements IContentPackage
 		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.CORE);
 		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.ROFS2);
 		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.ROFS3);
+		addEEnumLiteral(imagesectionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION.ANY);
+
+		initEEnum(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.class, "ACTION");
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.UDEB);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.REMOVE);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.HIDE);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.UDEB_ADD);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.UREL);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.UREL_ADD);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.REPLACE);
+		addEEnumLiteral(actionEEnum, com.nokia.s60tools.imaker.internal.model.iContent.ACTION.REPLACE_ADD);
 
 		// Create resource
 		createResource(eNS_URI);

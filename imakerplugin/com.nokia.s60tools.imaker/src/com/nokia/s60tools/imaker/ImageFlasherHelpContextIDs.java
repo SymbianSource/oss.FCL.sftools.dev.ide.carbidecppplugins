@@ -28,17 +28,20 @@ public class ImageFlasherHelpContextIDs {
      * to here to avoid runtime dependency to help project 
      */	 
     private static final String IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID = 
-                                        "com.nokia.s60tools.imaker.help";
+                                        "com.nokia.s60tools.imaker.doc.user";
 	
+    public static final String IMAKERDIALOG_CONFIGURATION = 
+    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERDIALOG_CONFIGURATION";
+
     public static final String IMAKERPLUGIN_HELP_PRODUCT = 
     	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERPLUGIN_HELP_PRODUCT";
-
+    
 
     public static final String IMAKERPLUGIN_HELP_TARGETS = 
     	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERPLUGIN_HELP_TARGETS";
     
     public static final String IMAKERPLUGIN_HELP_SELECTED_TARGETS = 
-    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERPLUGIN_HELP_TARGET_LIST";
+    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERPLUGIN_HELP_SELECTED_TARGETS";
     
     public static final String IMAKERPLUGIN_HELP_IMAGE_TYPE = 
     	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERPLUGIN_HELP_IMAGE_TYPE";
@@ -54,5 +57,17 @@ public class ImageFlasherHelpContextIDs {
     
     public static final String IMAKERPLUGIN_HELP = 
     	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID +".IMAKERPLUGIN_HELP";
+
+    public static final String IMAKER_DEBUGTAB_TABLE = 
+    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID + ".IMAKER_DEBUGTAB_TABLE";
+
+    public static final String IMAKERDIALOG_CONTENTTAB = 
+    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID + ".IMAKERDIALOG_CONTENTTAB";
+    
+    public static final String IMAKERDIALOG_SETTINGSTAB = 
+    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID + ".IMAKERDIALOG_SETTINGSTAB";
+    
+    public static final String IMAKERDIALOG_PLATSIMTAB = 
+    	IMAKERPLUGIN_HELP_PROJECT_PLUGIN_ID + ".IMAKERDIALOG_PLATSIMTAB";
     
 }

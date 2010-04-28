@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %plugin.Name
 Bundle-SymbolicName: com.nokia.s60tools.imaker;singleton:=true
 Bundle-ToolName: iMaker - Carbide.c++ extension
-Bundle-Version: 3.0.0
+Bundle-Version: 3.1.0
 Bundle-Date: 01-10-2009
 Bundle-RepositoryVersion: n/a
 Bundle-Activator: com.nokia.s60tools.imaker.IMakerPlugin

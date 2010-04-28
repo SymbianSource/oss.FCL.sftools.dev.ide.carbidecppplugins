@@ -26,8 +26,6 @@ import java.util.Properties;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -50,6 +48,7 @@ import com.nokia.s60tools.imaker.internal.impmodel.Variable;
 import com.nokia.s60tools.imaker.internal.impmodel.util.BasicTokenizer;
 import com.nokia.s60tools.imaker.internal.impmodel.util.ImpResourceImpl;
 import com.nokia.s60tools.imaker.internal.managers.ProjectManager;
+import com.nokia.s60tools.imaker.internal.model.iContent.ACTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentFactory;
 import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
@@ -123,13 +122,17 @@ public class ImakerProperties extends Properties {
 				for (int i = 0; i < entries.size(); i++) {
 					FileListEntry fEntry = entries.get(i);
 					EList<ConfigEntry> actions = fEntry.getActions();
-					if (!actions.isEmpty()) {
-						ConfigEntry action = actions.get(0);
+					for (ConfigEntry action : actions) {
 						IbyEntry iby = IContentFactory.eINSTANCE.createIbyEntry();
 						iby.setEnabled(true);
 						iby.setFile(fEntry.getSource());
 						iby.setTarget(fEntry.getTarget());
-						iby.setLocation(IMAGESECTION.get(action.getLocation()));
+						if(action.getLocation().equals(IMAGESECTION.ANY.getLiteral())) {
+							iby.setLocation(IMAGESECTION.ANY);							
+						} else {
+							iby.setLocation(IMAGESECTION.get(action.getLocation()));														
+						}
+						iby.setAction(ACTION.get(action.getAction()));
 						ibyEntries.add(iby);
 					}
 				}
@@ -212,6 +215,7 @@ public class ImakerProperties extends Properties {
 			List<IbyEntry> entries = (List<IbyEntry>) oEntries;
 			OverrideFiles files = factory.createOverrideFiles();
 			OverrideConfiguration confs = factory.createOverrideConfiguration();
+			
 			for (IbyEntry ibyEntry : entries) {
 				if(!ibyEntry.isEnabled()) {
 					continue; //Notice skipping disabled entries
@@ -220,22 +224,37 @@ public class ImakerProperties extends Properties {
 				ConfigEntry configEntry = factory.createConfigEntry();
 				fileEntry.setSource(ibyEntry.getFile());
 				fileEntry.setTarget(ibyEntry.getTarget());
-				files.getEntries().add(fileEntry);
+				if(!containsComponentEntry(files,fileEntry)) {
+					files.getEntries().add(fileEntry);					
+				}
 				
 				//
 				configEntry.setTarget(ibyEntry.getTarget());
-				configEntry.setAction("replace-add");
-				configEntry.setLocation(ibyEntry.getLocation().getName().toLowerCase());
+				configEntry.setAction(ibyEntry.getAction().getLiteral());
+				configEntry.setLocation(ibyEntry.getLocation().getLiteral());
 				confs.getEntries().add(configEntry);
 			}
+			
 			if(!files.getEntries().isEmpty()) {
-				doc.getOrideFiles().add(files);
 				doc.getOrideConfs().add(confs);
+				doc.getOrideFiles().add(files);
 			}
 		}
 		
 		//save override confs
 		return doc;
+	}
+
+	private boolean containsComponentEntry(OverrideFiles files,
+			FileListEntry fileEntry) {
+		boolean found = false;
+		for (FileListEntry entry : files.getEntries()) {
+			if (entry.getSource().equals(fileEntry.getSource())
+					&& entry.getTarget().equals(fileEntry.getTarget())) {
+				found = true;
+			}
+		}
+		return found;
 	}
 
 	private void addPlatsimVariables(Properties clone, ImpDocument doc,

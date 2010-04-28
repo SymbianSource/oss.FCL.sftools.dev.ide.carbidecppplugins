@@ -29,7 +29,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getFile <em>File</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getTarget <em>Target</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getLocation <em>Location</em>}</li>
- *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#isDebug <em>Debug</em>}</li>
+ *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getAction <em>Action</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#isEnabled <em>Enabled</em>}</li>
  *   <li>{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getStatusMessage <em>Status Message</em>}</li>
  * </ul>
@@ -122,30 +122,33 @@ public interface IbyEntry extends EObject {
 	void setLocation(IMAGESECTION value);
 
 	/**
-	 * Returns the value of the '<em><b>Debug</b></em>' attribute.
+	 * Returns the value of the '<em><b>Action</b></em>' attribute.
+	 * The literals are from the enumeration {@link com.nokia.s60tools.imaker.internal.model.iContent.ACTION}.
 	 * <!-- begin-user-doc -->
 	 * <p>
-	 * If the meaning of the '<em>Debug</em>' attribute isn't clear,
+	 * If the meaning of the '<em>Action</em>' attribute isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Debug</em>' attribute.
-	 * @see #setDebug(boolean)
-	 * @see com.nokia.s60tools.imaker.internal.model.iContent.IContentPackage#getIbyEntry_Debug()
+	 * @return the value of the '<em>Action</em>' attribute.
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.ACTION
+	 * @see #setAction(ACTION)
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.IContentPackage#getIbyEntry_Action()
 	 * @model
 	 * @generated
 	 */
-	boolean isDebug();
+	ACTION getAction();
 
 	/**
-	 * Sets the value of the '{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#isDebug <em>Debug</em>}' attribute.
+	 * Sets the value of the '{@link com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry#getAction <em>Action</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Debug</em>' attribute.
-	 * @see #isDebug()
+	 * @param value the new value of the '<em>Action</em>' attribute.
+	 * @see com.nokia.s60tools.imaker.internal.model.iContent.ACTION
+	 * @see #getAction()
 	 * @generated
 	 */
-	void setDebug(boolean value);
+	void setAction(ACTION value);
 
 	/**
 	 * Returns the value of the '<em><b>Enabled</b></em>' attribute.

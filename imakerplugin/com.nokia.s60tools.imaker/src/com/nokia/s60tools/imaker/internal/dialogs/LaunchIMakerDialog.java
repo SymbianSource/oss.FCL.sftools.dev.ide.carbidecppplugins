@@ -209,7 +209,6 @@ public class LaunchIMakerDialog extends TitleAreaDialog {
 			setFilePath(imakerTabsViewer.handleRunPressed());
 			okPressed();
 		} else if (buttonId == ID_CLOSE_BUTTON) {
-//			imakerTabsViewer.handleRunPressed();
 			cancelPressed();
 		} else {
 			super.buttonPressed(buttonId);
@@ -221,6 +220,12 @@ public class LaunchIMakerDialog extends TitleAreaDialog {
 		return DEFAULT_INITIAL_DIALOG_SIZE;
 	}
 
+	@Override
+	protected boolean isResizable() {
+		return true;
+	}
+
+	
 	/**
 	 * Sets the viewer used to display the tabs for a launch configuration.
 	 * 

@@ -21,9 +21,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -48,9 +48,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.PlatformUI;
 
 import com.nokia.s60tools.imaker.IMakerKeyConstants;
 import com.nokia.s60tools.imaker.IMakerPlugin;
+import com.nokia.s60tools.imaker.ImageFlasherHelpContextIDs;
 import com.nokia.s60tools.imaker.Messages;
 import com.nokia.s60tools.imaker.UIConfiguration;
 import com.nokia.s60tools.imaker.UITarget;
@@ -58,6 +60,7 @@ import com.nokia.s60tools.imaker.internal.managers.ProjectManager;
 import com.nokia.s60tools.imaker.internal.model.FileToImage;
 import com.nokia.s60tools.imaker.internal.model.ImakerProperties;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentFactory;
+import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
 import com.nokia.s60tools.imaker.internal.model.iContent.ImageContent;
 import com.nokia.s60tools.imaker.internal.providers.CheckBoxEditingSupport;
@@ -79,6 +82,7 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 	private ProjectManager projectManager;
 	private TableViewer tableViewer;
 	private PreferencesTab mainTab;
+	private IContentFactory factory;
 	
 	static {
 		String iconPath = "icons/"; 
@@ -105,9 +109,27 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		this.tabsViewer = viewer;
 		this.projectManager = tabsViewer.getProjectManager();
 		setControl(createControl(parent));
-		this.mainTab = main;		
+		this.mainTab = main;
+		this.factory = IContentFactory.eINSTANCE;
 	}
 	
+	private void duplicateSelection() {
+		ISelection selection = tableViewer.getSelection();
+		if(selection!=null) {
+			IStructuredSelection ss = (IStructuredSelection) selection;
+			IbyEntry item = (IbyEntry) ss.getFirstElement();
+			IbyEntry copy = factory.createIbyEntry();
+			copy.setAction(item.getAction());
+			copy.setEnabled(item.isEnabled());
+			copy.setFile(item.getFile());
+			copy.setTarget(item.getTarget());
+			copy.setLocation(item.getLocation());
+			ImageContent ic = getInput();
+			int index = ic.getEntries().indexOf(item);
+			ic.getEntries().add(index+1, copy);
+			tableViewer.refresh();
+		}
+	}
 	private void deleteSelection() {
 		ISelection selection = tableViewer.getSelection();
 		if(selection!=null) {
@@ -126,6 +148,7 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		Composite top = new Composite(parent,SWT.NONE);
 		top.setLayout(new GridLayout(2,false));
 		top.setLayoutData(new GridData(GridData.FILL_BOTH));
+		setHelpForControl(top, ImageFlasherHelpContextIDs.IMAKERDIALOG_CONTENTTAB);
 		
 		// create table
 		Composite tableComp = getNewComposite(top);
@@ -158,9 +181,8 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		button.setToolTipText(Messages.getString("DebugTab.3"));
 		button.addSelectionListener(new SelectionListener() {
 			
-//			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IbyEntry entry = IContentFactory.eINSTANCE.createIbyEntry();
+				IbyEntry entry = factory.createIbyEntry();
 				ImageContent input = getInput();
 				FileToImage file = new FileToImage();
 				AddEditFileToTransferDialog dialog= new AddEditFileToTransferDialog(getControl().getShell(), file);
@@ -171,17 +193,11 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 				entry.setEnabled(file.getEnabled());
 				entry.setFile(file.getHostPath().substring(2));
 				entry.setTarget(file.getTargetPath());
-				entry.setDebug(isDebug(entry.getFile()));
 				input.getEntries().add(entry);
 				tableViewer.refresh();
 			}
 			
-			private boolean isDebug(String file) {
-				Pattern p = Pattern.compile(DEBUG_PATTERN);
-				return p.matcher(file).find();
-			}
 
-//			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -193,12 +209,25 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		button.setToolTipText(Messages.getString("DebugTab.5"));
 		button.addSelectionListener(new SelectionListener() {
 			
-//			@Override
 			public void widgetSelected(SelectionEvent e) {
 				deleteSelection();
 			}
 			
-//			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+		});
+		
+		button = new Button(controls,SWT.PUSH|SWT.LEFT);
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		button.setText(Messages.getString("DebugTab.24"));
+		button.setToolTipText(Messages.getString("DebugTab.25"));
+		button.addSelectionListener(new SelectionListener() {
+			
+			public void widgetSelected(SelectionEvent e) {
+				duplicateSelection();
+			}
+			
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -210,16 +239,25 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		button.setToolTipText(Messages.getString("DebugTab.7"));
 		button.addSelectionListener(new SelectionListener() {
 			
-//			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ImageContent input = getInput();
 				if(input!=null) {
+					
+					if (!input.getEntries().isEmpty()) {
+						boolean confirm = MessageDialog
+								.openQuestion(
+										getControl().getShell(),
+										"Remove Entries",
+										"Clear the list before adding new entries, if any?");
+						if (confirm) {
+							input.getEntries().clear();							
+						}
+					}
 					projectManager.populate(input);
 					tableViewer.refresh();
 				}
 			}
 			
-//			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -298,6 +336,9 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		return top;	
 	}
 
+	private void setHelpForControl(Control container, String id) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(container, id);
+	}
 	private Object getDefaultInput() {
 		IContentFactory factory = IContentFactory.eINSTANCE;
 		ImageContent ic = factory.createImageContent();
@@ -317,10 +358,11 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 	}
 
 	private void createColumns(TableViewer viewer) {
-		int columnSizes[] = {20,50,130,130,60,50};
+		int columnSizes[] = {20,50,130,130,60,60};
 		
 		TableViewerColumn column = new TableViewerColumn(viewer,SWT.NONE);
-		column.getColumn().setText("!");
+		column.getColumn().setText(Messages.getString("DebugTab.12"));
+		column.getColumn().setToolTipText(Messages.getString("DebugTab.13"));
 		column.getColumn().setWidth(columnSizes[0]);
 		column.setLabelProvider(new ColumnLabelProvider() {	
 			
@@ -354,7 +396,9 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 						}
 					}
 				}
-				mainTab.addTarget(entry.getLocation().getName());
+				if(entry.getLocation()!=IMAGESECTION.ANY) {
+					mainTab.addTarget(entry.getLocation().getName());					
+				}
 				return false;
 			}
 
@@ -380,10 +424,11 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 			}
 			
 		});
-		column.setEditingSupport(new CheckBoxEditingSupport(viewer, 0));
+//		column.setEditingSupport(new CheckBoxEditingSupport(viewer, 0));
 		
 		column = new TableViewerColumn(viewer,SWT.CENTER);
-		column.getColumn().setText("Enable");
+		column.getColumn().setText(Messages.getString("DebugTab.14"));
+		column.getColumn().setToolTipText(Messages.getString("DebugTab.15"));
 		column.getColumn().setWidth(columnSizes[1]);
 		column.setLabelProvider( new ColumnLabelProvider() {	
 			
@@ -402,7 +447,8 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		column.setEditingSupport(new CheckBoxEditingSupport(viewer, 1));
 		
 		column = new TableViewerColumn(viewer,SWT.NONE);
-		column.getColumn().setText("File");
+		column.getColumn().setText(Messages.getString("DebugTab.16"));
+		column.getColumn().setToolTipText(Messages.getString("DebugTab.17"));
 		column.getColumn().setWidth(columnSizes[2]);
 		column.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -415,7 +461,8 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 
 		
 		column = new TableViewerColumn(viewer,SWT.NONE);
-		column.getColumn().setText("Target");
+		column.getColumn().setText(Messages.getString("DebugTab.18"));
+		column.getColumn().setToolTipText(Messages.getString("DebugTab.19"));
 		column.getColumn().setWidth(columnSizes[3]);
 		column.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -427,7 +474,8 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		column.setEditingSupport(new TextEditingSupport(viewer,3));
 		
 		column = new TableViewerColumn(viewer,SWT.NONE);
-		column.getColumn().setText("Location");
+		column.getColumn().setText(Messages.getString("DebugTab.20"));
+		column.getColumn().setToolTipText(Messages.getString("DebugTab.21"));
 		column.getColumn().setWidth(columnSizes[4]);
 		column.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -438,42 +486,31 @@ public class DebugTab extends CTabItem implements IPropertyViewer {
 		});
 		column.setEditingSupport(new ComboEditingSupport(viewer,4));
 		
-		column = new TableViewerColumn(viewer,SWT.CENTER);
-		column.getColumn().setText("Debug");
+		column = new TableViewerColumn(viewer,SWT.LEFT);
+		column.getColumn().setText(Messages.getString("DebugTab.22"));
+		column.getColumn().setToolTipText(Messages.getString("DebugTab.23"));
 		column.getColumn().setWidth(columnSizes[5]);
 		column.setLabelProvider( new ColumnLabelProvider() {
-					
-			@Override
-			public Image getImage(Object element) {
-				IbyEntry ie = (IbyEntry) element;
-				String key = ie.isDebug() ? CHECKED_IMAGE : UNCHECKED_IMAGE;
-				return imageRegistry.get(key);
-			}
-
 			@Override
 			public String getText(Object element) {
-				return "";
+				IbyEntry e = (IbyEntry) element;
+				return e.getAction().getLiteral();
 			}
 		});
-		column.setEditingSupport(new CheckBoxEditingSupport(viewer, 5));		
+		column.setEditingSupport(new ComboEditingSupport(viewer,5));		
 	}
 	
 	
 	private class DebugContentProvider  implements IStructuredContentProvider {
 
-//		@Override
 		public Object[] getElements(Object inputElement) {
 			ImageContent ic = (ImageContent) inputElement;
 			return ic.getEntries().toArray();
 		}
 
-//		@Override
-		public void dispose() {
-		}
+		public void dispose() {}
 
-//		@Override
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
 	}
 
 	/* (non-Javadoc)

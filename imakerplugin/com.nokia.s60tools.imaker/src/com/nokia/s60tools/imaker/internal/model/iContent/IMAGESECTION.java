@@ -40,7 +40,7 @@ public enum IMAGESECTION implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	CORE(0, "CORE", "CORE"),
+	CORE(0, "CORE", "core"),
 
 	/**
 	 * The '<em><b>ROFS2</b></em>' literal object.
@@ -50,7 +50,7 @@ public enum IMAGESECTION implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	ROFS2(1, "ROFS2", "ROFS2"),
+	ROFS2(1, "ROFS2", "rofs2"),
 
 	/**
 	 * The '<em><b>ROFS3</b></em>' literal object.
@@ -60,7 +60,15 @@ public enum IMAGESECTION implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	ROFS3(2, "ROFS3", "ROFS3");
+	ROFS3(2, "ROFS3", "rofs3"), /**
+	 * The '<em><b>ANY</b></em>' literal object.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #ANY_VALUE
+	 * @generated
+	 * @ordered
+	 */
+	ANY(3, "ANY", "*");
 
 	/**
 	 * The '<em><b>CORE</b></em>' literal value.
@@ -71,7 +79,7 @@ public enum IMAGESECTION implements Enumerator {
 	 * </p>
 	 * <!-- end-user-doc -->
 	 * @see #CORE
-	 * @model
+	 * @model literal="core"
 	 * @generated
 	 * @ordered
 	 */
@@ -86,7 +94,7 @@ public enum IMAGESECTION implements Enumerator {
 	 * </p>
 	 * <!-- end-user-doc -->
 	 * @see #ROFS2
-	 * @model
+	 * @model literal="rofs2"
 	 * @generated
 	 * @ordered
 	 */
@@ -101,11 +109,26 @@ public enum IMAGESECTION implements Enumerator {
 	 * </p>
 	 * <!-- end-user-doc -->
 	 * @see #ROFS3
-	 * @model
+	 * @model literal="rofs3"
 	 * @generated
 	 * @ordered
 	 */
 	public static final int ROFS3_VALUE = 2;
+
+	/**
+	 * The '<em><b>ANY</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>ANY</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #ANY
+	 * @model literal="*"
+	 * @generated
+	 * @ordered
+	 */
+	public static final int ANY_VALUE = 3;
 
 	/**
 	 * An array of all the '<em><b>IMAGESECTION</b></em>' enumerators.
@@ -118,6 +141,7 @@ public enum IMAGESECTION implements Enumerator {
 			CORE,
 			ROFS2,
 			ROFS3,
+			ANY,
 		};
 
 	/**
@@ -171,6 +195,7 @@ public enum IMAGESECTION implements Enumerator {
 			case CORE_VALUE: return CORE;
 			case ROFS2_VALUE: return ROFS2;
 			case ROFS3_VALUE: return ROFS3;
+			case ANY_VALUE: return ANY;
 		}
 		return null;
 	}

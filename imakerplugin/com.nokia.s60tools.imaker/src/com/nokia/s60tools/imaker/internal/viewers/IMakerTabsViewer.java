@@ -47,6 +47,7 @@ import org.eclipse.ui.PlatformUI;
 
 import com.nokia.s60tools.imaker.IEnvironmentManager;
 import com.nokia.s60tools.imaker.IMakerPlugin;
+import com.nokia.s60tools.imaker.ImageFlasherHelpContextIDs;
 import com.nokia.s60tools.imaker.Messages;
 import com.nokia.s60tools.imaker.SWTFactory;
 import com.nokia.s60tools.imaker.internal.dialogs.LaunchIMakerDialog;
@@ -138,8 +139,17 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
 				fConfigWidget.select(i+1);
 			}		
 		}
+		enabaleReload(selection);
 	}
 
+
+	private void enabaleReload(String selection) {
+		if (ProjectManager.NEW_ITEM.equals(selection)) {
+			fReloadButton.setEnabled(true);
+		} else {
+			fReloadButton.setEnabled(false);						
+		}
+	}
 
 	public IEnvironmentManager getEnvironmentManager() {
 		return environmentManager;
@@ -223,20 +233,21 @@ public class IMakerTabsViewer extends Viewer implements IObserver {
         fConfigWidget.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         fConfigWidget.addSelectionListener(new SelectionListener() {
 			
-//			@Override
 			public void widgetSelected(SelectionEvent se) {
 				try {
-					tabPreferences.loadImakerFile(getSelectedItem());
+					String item = getSelectedItem();
+					enabaleReload(item);
+					tabPreferences.loadImakerFile(item);
 				} catch (InvocationTargetException e) {
 					e.printStackTrace();
 				}
 			}
 			
-//			@Override
 			public void widgetDefaultSelected(SelectionEvent se) {
 				widgetSelected(se);
 			}
 		});
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(fConfigWidget, ImageFlasherHelpContextIDs.IMAKERDIALOG_CONFIGURATION);
         
         fConfigWidget.setToolTipText(Messages.getString("IMakerTabsViewer.2"));
         deleteButton = new Button(comboComp, SWT.PUSH);

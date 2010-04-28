@@ -40,6 +40,7 @@ import com.nokia.s60tools.imaker.internal.impmodel.OverrideFiles;
 import com.nokia.s60tools.imaker.internal.impmodel.Variable;
 import com.nokia.s60tools.imaker.internal.impmodel.util.ImpResourceFactoryImpl;
 import com.nokia.s60tools.imaker.internal.model.ImakerProperties;
+import com.nokia.s60tools.imaker.internal.model.iContent.ACTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IContentFactory;
 import com.nokia.s60tools.imaker.internal.model.iContent.IMAGESECTION;
 import com.nokia.s60tools.imaker.internal.model.iContent.IbyEntry;
@@ -125,7 +126,7 @@ public class ImakerPropertiesTest extends ProjectBuilder {
 		assertEquals(true, iby.isEnabled());
 		assertEquals("\\epoc32\\release\\ARMV5\\UDEB\\HelloConsole1.exe", iby.getFile());
 		assertEquals("\\sys\\bin\\HelloConsole1.exe", iby.getTarget());
-		assertEquals("CORE", iby.getLocation().getLiteral());
+		assertEquals("core", iby.getLocation().getLiteral());
 	}
     
     public void testSavingToFileMainTab() throws Exception {
@@ -173,7 +174,7 @@ public class ImakerPropertiesTest extends ProjectBuilder {
     	
     	IbyEntry entry = IContentFactory.eINSTANCE.createIbyEntry();
     	entry.setEnabled(true);
-    	entry.setDebug(true);
+    	entry.setAction(ACTION.HIDE);
 		entry.setFile("file1");
     	entry.setLocation(IMAGESECTION.CORE);
 		entry.setTarget("target1");
@@ -181,7 +182,7 @@ public class ImakerPropertiesTest extends ProjectBuilder {
 
 		entry = IContentFactory.eINSTANCE.createIbyEntry();
 		entry.setEnabled(false);
-		entry.setDebug(true);
+		entry.setAction(ACTION.REMOVE);
 		entry.setFile("file2");
 		entry.setLocation(IMAGESECTION.ROFS3);
 		entry.setTarget("target2");
@@ -189,7 +190,7 @@ public class ImakerPropertiesTest extends ProjectBuilder {
 
 		entry = IContentFactory.eINSTANCE.createIbyEntry();
 		entry.setEnabled(true);
-		entry.setDebug(true);
+		entry.setAction(ACTION.REPLACE);
 		entry.setFile("file3");
 		entry.setLocation(IMAGESECTION.ROFS3);
 		entry.setTarget("target3");
