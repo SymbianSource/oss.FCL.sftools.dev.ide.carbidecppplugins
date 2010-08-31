@@ -2,7 +2,7 @@
 <feature
       id="com.nokia.s60tools.extensions.framework"
       label="Carbide.c++ Extensions - Framework plug-ins"
-      version="1.8.0"
+      version="1.9.0"
       provider-name="Nokia">
 
    <description>
@@ -48,7 +48,6 @@ at the URL &quot;http://www.eclipse.org/legal/epl-v10.html&quot;.
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.core.resources"/>
-      <import plugin="com.freescale.cdt.debug.cw.core" version="1.4.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.cdt.core" version="5.0.1" match="greaterOrEqual"/>
       <import plugin="com.nokia.carbide.cpp.project.core"/>
    </requires>

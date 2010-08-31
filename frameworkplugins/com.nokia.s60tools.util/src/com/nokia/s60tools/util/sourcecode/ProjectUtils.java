@@ -29,9 +29,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.PartInitException;
 
+import com.nokia.carbide.cdt.builder.CarbideBuilderPlugin;
 import com.nokia.carbide.cpp.project.core.ProjectCorePlugin;
 import com.nokia.carbide.cpp.sdk.core.ISDKManager;
 import com.nokia.carbide.cpp.sdk.core.ISymbianBuildContext;
+import com.nokia.carbide.cpp.sdk.core.ISymbianBuilderID;
 import com.nokia.carbide.cpp.sdk.core.ISymbianSDK;
 import com.nokia.carbide.cpp.sdk.core.SDKCorePlugin;
 import com.nokia.s60tools.util.console.IConsolePrintUtility;
@@ -154,7 +156,13 @@ public class ProjectUtils {
 	   ISymbianSDK sdk = manager.getSDK(sdkID, true);//get currently used SDK	   
 	   	   
 	   //Get all build configurations of used SDK
-	   List<ISymbianBuildContext> buildConfigs = sdk.getUnfilteredBuildConfigurations();
+       boolean sbsv2Project = project.hasNature(CarbideBuilderPlugin.CARBIDE_SBSV2_PROJECT_NATURE_ID);
+	   String builderId = sbsv2Project ? 
+			   ISymbianBuilderID.SBSV2_BUILDER : ISymbianBuilderID.SBSV1_BUILDER;
+	   	   
+	   List<ISymbianBuildContext> buildConfigs =
+				sdk.getBuildInfo(builderId).getFilteredBuildConfigurations();
+				
 	   List<String> infComponentsList = new ArrayList<String>();
 	   
 	   ICProject cProject = ProjectCorePlugin.postProjectCreatedActions(

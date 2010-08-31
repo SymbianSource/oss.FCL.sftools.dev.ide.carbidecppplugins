@@ -190,7 +190,7 @@ public class SdkManager extends Plugin {
 			//       i.e. call to sdk.getId() does not return 
 			//       valid SDK ID, but sdk.getLabel() does.
 			sdkInfoReturned.setSdkId(sdk.getUniqueId());
-			sdkInfoReturned.setSdkName(sdk.getName());
+			
 			sdkInfoReturned.setEpocRootDir(sdk.getEPOCROOT());
 			sdkInfoReturned.setReleaseRootDir(sdk.getReleaseRoot().toOSString());//Returns IPath
 			sdkInfoReturned.setEpoc32ToolsDir(sdk.getToolsPath().toOSString());
