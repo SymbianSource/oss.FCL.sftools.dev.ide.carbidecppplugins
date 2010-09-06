@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Carbide.c++ Extensions - HTI Connection
 Bundle-SymbolicName: com.nokia.s60tools.hticonnection;singleton:=true
-Bundle-Version: 1.4.0
+Bundle-Version: 1.5.0.quaifier
 Bundle-ClassPath: .,
  htiapi.jar
 Bundle-Vendor: Nokia
@@ -13,8 +13,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.nokia.s60tools.ui;bundle-version="1.5.0",
  com.nokia.s60tools.util;bundle-version="1.1.11",
  com.nokia.carbide.remoteConnections;bundle-version="1.4.0",
- com.nokia.carbide.trk.support;bundle-version="1.4.0",
- com.freescale.cdt.debug.cw.core;bundle-version="1.4.0"
+ com.nokia.carbide.trk.support;bundle-version="1.4.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Activator: com.nokia.s60tools.hticonnection.HtiApiActivator
 Bundle-ActivationPolicy: lazy

@@ -24,13 +24,25 @@
                tooltip="HTI Connection"/>
       </actionSet>
    </extension>
+   
+   <extension
+       point="org.eclipse.ui.keywords">
+    <keyword
+          id="com.nokia.s60tools.hticonnection.preferences.common"
+          label="%htiApiPreference.common">
+    </keyword>
+ </extension>
+   
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="com.nokia.carbide.cpp.preferences.ExtensionsPreferencesPage"
             class="com.nokia.s60tools.hticonnection.preferences.HtiApiPreferencePage"
             id="com.nokia.s60tools.hticonnection.preferences.HtiApiPreferencePage"
-            name="HTI Connection Preferences">
+            name="HTI Connection">
+            <keywordReference
+               id="com.nokia.s60tools.hticonnection.preferences.common">
+            </keywordReference>
       </page>
    </extension>
    <extension

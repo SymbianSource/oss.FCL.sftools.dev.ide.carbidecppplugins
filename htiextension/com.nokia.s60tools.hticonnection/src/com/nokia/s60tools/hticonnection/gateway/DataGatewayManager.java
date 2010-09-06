@@ -20,7 +20,6 @@ package com.nokia.s60tools.hticonnection.gateway;
 import java.io.File;
 import java.io.IOException;
 
-import com.freescale.cdt.debug.cw.core.SerialConnectionSettings;
 import com.nokia.carbide.remoteconnections.interfaces.IConnection;
 import com.nokia.s60tools.hticonnection.HtiApiActivator;
 import com.nokia.s60tools.hticonnection.common.ProductInfoRegistry;
@@ -44,6 +43,13 @@ public class DataGatewayManager {
 	private static final String COMM_CHANNEL_PARAMETER = "-commchannel="; //$NON-NLS-1$
 	private static final String COMM_CHANNEL_SERIAL = "SERIAL"; //$NON-NLS-1$
 	private static final String COMM_CHANNEL_IP = "IPCOMM"; //$NON-NLS-1$
+	
+	// This constant is introduced to remove the dependency to class com.freescale.cdt.debug.cw.core.SerialConnectionSettings,
+	// which existed only because of the string value of constant SerialConnectionSettings.Port.
+	// The string value is the same as SerialConnectionSettings.Port. 
+	// It is essentially API and will not be changed.
+	private static final String PORT = "port"; //$NON-NLS-1$
+	
 	
 	/**
 	 * Class that holdes Datagateway.exe process that is running.
@@ -124,7 +130,7 @@ public class DataGatewayManager {
 				type.equals(HTIService.USB_TYPE)) {
 			// Handling serial connections
 			
-			String comPort = "COM" + connection.getSettings().get(SerialConnectionSettings.PORT); //$NON-NLS-1$
+			String comPort = "COM" + connection.getSettings().get(PORT); //$NON-NLS-1$
 
 			String[] cmd = new String[] {
 					path + File.separator + ProductInfoRegistry.getDatagatewayExeName(), 

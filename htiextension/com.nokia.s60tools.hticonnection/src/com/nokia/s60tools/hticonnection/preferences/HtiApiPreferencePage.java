@@ -70,7 +70,7 @@ public class HtiApiPreferencePage extends PreferencePage implements
 	 * Constructor
 	 */
 	public HtiApiPreferencePage() {
-		super(ProductInfoRegistry.getProductName() + Messages.getString("HtiApiPreferencePage.Preferences_Postfix")); //$NON-NLS-1$
+		super(ProductInfoRegistry.getProductName()); //$NON-NLS-1$
 		isCreated = true;
 	}
 
