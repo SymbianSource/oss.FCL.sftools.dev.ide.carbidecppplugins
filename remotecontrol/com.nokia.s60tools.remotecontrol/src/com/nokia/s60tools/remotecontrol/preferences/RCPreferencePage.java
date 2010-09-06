@@ -35,7 +35,7 @@ import com.nokia.s60tools.remotecontrol.common.ProductInfoRegistry;
 import com.nokia.s60tools.remotecontrol.resources.Messages;
 
 /**
- * Reference page for Remote control
+ * Preference page for Remote control
  */
 public class RCPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
@@ -70,7 +70,7 @@ public class RCPreferencePage extends PreferencePage implements
 	 * General constructor for opening default page.
 	 */
 	public RCPreferencePage() {
-		super(ProductInfoRegistry.getProductName() + Messages.getString("RCPreferencePage.Preferences")); //$NON-NLS-1$
+		super(ProductInfoRegistry.getProductName());
 	}
 
 	/*

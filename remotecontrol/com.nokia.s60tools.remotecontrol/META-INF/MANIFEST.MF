@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Carbide.c++ Extensions - Remote Control
 Bundle-SymbolicName: com.nokia.s60tools.remotecontrol;singleton:=true
-Bundle-Version: 1.4.0
+Bundle-Version: 1.5.0.qualifier
 Bundle-Activator: com.nokia.s60tools.remotecontrol.RemoteControlActivator
 Bundle-Vendor: Nokia
 Require-Bundle: org.eclipse.ui,

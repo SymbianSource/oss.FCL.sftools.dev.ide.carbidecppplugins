@@ -49,13 +49,25 @@
             id="com.nokia.s60tools.remotecontrol.ui.views.main.MainView"
             name="Remote Control"/>
    </extension>
+   
+   <extension
+       point="org.eclipse.ui.keywords">
+    <keyword
+          id="com.nokia.s60tools.remotecontrol.common"
+          label="%remoteControlPreference.common">
+    </keyword>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="com.nokia.carbide.cpp.preferences.ExtensionsPreferencesPage"
             class="com.nokia.s60tools.remotecontrol.preferences.RCPreferencePage"
             id="com.nokia.s60tools.remotecontrol.RCPreferencePage"
-            name="Remote Control Preferences">
+            name="Remote Control">
+         <keywordReference
+               id="com.nokia.s60tools.remotecontrol.common">
+         </keywordReference>
       </page>
    </extension>
    <extension

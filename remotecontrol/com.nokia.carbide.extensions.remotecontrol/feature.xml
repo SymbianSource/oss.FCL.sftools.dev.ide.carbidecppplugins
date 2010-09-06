@@ -2,7 +2,7 @@
 <feature
       id="com.nokia.carbide.extensions.remotecontrol"
       label="Carbide.c++ Extensions - Remote Control"
-      version="1.4.0"
+      version="1.5.0"
       provider-name="Nokia"
       plugin="com.nokia.s60tools.remotecontrol">
 
@@ -28,8 +28,8 @@ at the URL &quot;http://www.eclipse.org/legal/epl-v10.html&quot;.
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="com.nokia.s60tools.util" version="1.1.11" match="greaterOrEqual"/>
-      <import plugin="com.nokia.s60tools.hticonnection" version="1.4.0" match="greaterOrEqual"/>
+      <import feature="com.nokia.s60tools.extensions.framework"/>
+      <import feature="com.nokia.carbide.extensions.hticonnection" version="1.4.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
