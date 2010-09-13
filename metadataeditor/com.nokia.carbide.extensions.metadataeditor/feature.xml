@@ -7,7 +7,7 @@
       plugin="com.nokia.s60tools.metadataeditor">
 
    <description>
-      Metadata Editor is validating visual editor for XML based API metadata.
+      Metadata Editor is a validating visual editor for XML based API metadata.
    </description>
 
    <copyright>
