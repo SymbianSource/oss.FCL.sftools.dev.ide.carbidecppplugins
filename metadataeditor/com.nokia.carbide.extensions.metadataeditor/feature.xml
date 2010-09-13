@@ -2,7 +2,7 @@
 <feature
       id="com.nokia.carbide.extensions.metadataeditor"
       label="Carbide.c++ Extensions - Metadata Editor"
-      version="1.1.2"
+      version="1.1.2.qualifier"
       provider-name="Nokia"
       plugin="com.nokia.s60tools.metadataeditor">
 

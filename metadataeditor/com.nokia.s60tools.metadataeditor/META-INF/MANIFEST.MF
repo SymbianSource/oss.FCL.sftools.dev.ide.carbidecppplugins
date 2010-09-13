@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Carbide.c++ Extensions - Metadata Editor
 Bundle-SymbolicName: com.nokia.s60tools.metadataeditor; singleton:=true
-Bundle-Version: 1.1.2
+Bundle-Version: 1.1.2.qualifier
 Bundle-Activator: com.nokia.s60tools.metadataeditor.MetadataEditorActivator
 Bundle-Vendor: Nokia
 Require-Bundle: org.eclipse.ui,
