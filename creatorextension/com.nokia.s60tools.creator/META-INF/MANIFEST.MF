@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Carbide.c++ Extensions - Creator Script Editor
 Bundle-SymbolicName: com.nokia.s60tools.creator; singleton:=true
-Bundle-Version: 1.2.0
+Bundle-Version: 1.3.0.qualifier
 Bundle-Activator: com.nokia.s60tools.creator.CreatorActivator
 Bundle-Vendor: Nokia
 Require-Bundle: org.eclipse.ui,

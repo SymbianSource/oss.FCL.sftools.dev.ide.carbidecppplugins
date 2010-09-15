@@ -70,11 +70,20 @@
        <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            name="Creator Script Editor Preferences"
+            name="Creator Script Editor"
             class="com.nokia.s60tools.creator.preferences.CreatorPreferencePage"
             category="com.nokia.carbide.cpp.preferences.ExtensionsPreferencesPage"
             id="com.nokia.s60tools.creator.preferences.CreatorPreferencePage">
+            <keywordReference
+             id="com.nokia.s60tools.creator.keywords.common">
+            </keywordReference>
       </page>
    </extension>   
-
+<extension
+       point="org.eclipse.ui.keywords">
+    <keyword
+          id="com.nokia.s60tools.creator.keywords.common"
+          label="%creatorKeywords.common">
+    </keyword>
+ </extension>
 </plugin>
