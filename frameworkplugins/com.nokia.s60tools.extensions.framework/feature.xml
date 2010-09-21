@@ -2,7 +2,7 @@
 <feature
       id="com.nokia.s60tools.extensions.framework"
       label="Carbide.c++ Extensions - Framework plug-ins"
-      version="1.9.0"
+      version="1.9.0.qualifier"
       provider-name="Nokia">
 
    <description>

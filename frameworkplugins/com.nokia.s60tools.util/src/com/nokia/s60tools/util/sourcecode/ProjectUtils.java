@@ -31,6 +31,7 @@ import org.eclipse.ui.PartInitException;
 
 import com.nokia.carbide.cdt.builder.CarbideBuilderPlugin;
 import com.nokia.carbide.cpp.project.core.ProjectCorePlugin;
+import com.nokia.carbide.cpp.sdk.core.ISDKBuildInfo;
 import com.nokia.carbide.cpp.sdk.core.ISDKManager;
 import com.nokia.carbide.cpp.sdk.core.ISymbianBuildContext;
 import com.nokia.carbide.cpp.sdk.core.ISymbianBuilderID;
@@ -159,10 +160,14 @@ public class ProjectUtils {
        boolean sbsv2Project = project.hasNature(CarbideBuilderPlugin.CARBIDE_SBSV2_PROJECT_NATURE_ID);
 	   String builderId = sbsv2Project ? 
 			   ISymbianBuilderID.SBSV2_BUILDER : ISymbianBuilderID.SBSV1_BUILDER;
-	   	   
-	   List<ISymbianBuildContext> buildConfigs =
-				sdk.getBuildInfo(builderId).getFilteredBuildConfigurations();
-				
+	   
+	   // If there is no build info for the builderId, null is returned.
+	   ISDKBuildInfo info = sdk.getBuildInfo(builderId);
+	   
+	   // null buildConfigs list is not allowed. 
+	   List<ISymbianBuildContext> buildConfigs = (null != info) ? 
+			   info.getFilteredBuildConfigurations() : new ArrayList<ISymbianBuildContext>();
+	   
 	   List<String> infComponentsList = new ArrayList<String>();
 	   
 	   ICProject cProject = ProjectCorePlugin.postProjectCreatedActions(
